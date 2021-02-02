@@ -87,3 +87,11 @@ body {
     cursor: pointer;
     margin-top: 2em;
 }
+
+#Link {
+  text-decoration: none;
+}
+
+canvas {
+  cursor: crosshair;
+}

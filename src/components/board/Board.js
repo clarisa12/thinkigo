@@ -1,74 +1,71 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
 import "./Board.css";
 
 function Board(props) {
+  const [drawing, setDrawing] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+
+  const canvasRef = useRef();
+  const ctx = useRef();
+
   useEffect(() => {
-    drawOnCanvas();
+    ctx.current = canvasRef.current.getContext("2d");
   }, []);
 
-  useEffect(() => {
-    drawOnCanvas();
-  }, [props.color]);
+  const [windowWidth, windowHeight] = useWindowSize(() => {
+    setWidth(window.innerWidth);
+    setHeight(window.innerHeight);
+  });
 
-  let drawOnCanvas = () => {
-    var canvas = document.querySelector("#board");
-    var ctx = canvas.getContext("2d");
-
-    var sketch = document.querySelector("#sketch");
-    var sketch_style = getComputedStyle(sketch);
-    canvas.width = parseInt(sketch_style.getPropertyValue("width"));
-    canvas.height = parseInt(sketch_style.getPropertyValue("height"));
-
-    var mouse = { x: 0, y: 0 };
-    var last_mouse = { x: 0, y: 0 };
-
-    /* Mouse Capturing Work */
-    canvas.addEventListener(
-      "mousemove",
-      function (e) {
-        last_mouse.x = mouse.x;
-        last_mouse.y = mouse.y;
-
-        mouse.x = e.pageX - this.offsetLeft;
-        mouse.y = e.pageY - this.offsetTop;
-      },
-      false
-    );
-
-    /* Drawing on Paint App */
-    ctx.lineWidth = 2;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.strokeStyle = props.color;
-
-    canvas.addEventListener(
-      "mousedown",
-      function (e) {
-        canvas.addEventListener("mousemove", onPaint, false);
-      },
-      false
-    );
-
-    canvas.addEventListener(
-      "mouseup",
-      function () {
-        canvas.removeEventListener("mousemove", onPaint, false);
-      },
-      false
-    );
-
-    var onPaint = function () {
-      ctx.beginPath();
-      ctx.moveTo(last_mouse.x, last_mouse.y);
-      ctx.lineTo(mouse.x, mouse.y);
-      ctx.closePath();
-      ctx.stroke();
-    };
+  const clear = () => {
+    ctx.current.clearRect(0, 0, width, height);
   };
+
+  function handleMouseMove(e) {
+    const coords = [
+      e.clientX - canvasRef.current.offsetLeft,
+      e.clientY - canvasRef.current.offsetTop,
+    ];
+    if (drawing) {
+      ctx.current.lineTo(...coords);
+      ctx.current.stroke();
+    }
+    if (props.handleMouseMove) {
+      props.handleMouseMove(...coords);
+    }
+  }
+  function startDrawing(e) {
+    ctx.current.lineJoin = "round";
+    ctx.current.lineCap = "round";
+    ctx.current.lineWidth = props.brush;
+    ctx.current.strokeStyle = props.color;
+    ctx.current.beginPath();
+    ctx.current.moveTo(
+      e.clientX - canvasRef.current.offsetLeft,
+      e.clientY - canvasRef.current.offsetTop
+    );
+    setDrawing(true);
+  }
+
+  function stopDrawing() {
+    ctx.current.closePath();
+    setDrawing(false);
+  }
 
   return (
     <div className="sketch" id="sketch">
-      <canvas className="board" id="board"></canvas>
+      <button onClick={clear}>clear</button>
+      <canvas
+        ref={canvasRef}
+        width={props.width || width}
+        height={props.height || height}
+        onMouseDown={startDrawing}
+        onMouseUp={stopDrawing}
+        onMouseOut={stopDrawing}
+        onMouseMove={handleMouseMove}
+      />
     </div>
   );
 }

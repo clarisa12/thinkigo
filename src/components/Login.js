@@ -34,6 +34,5 @@ export default function Login() {
                 </div>
                 <div className="login-container-right"></div>
             </div>
-        </div>
-    );
+
 }

@@ -5,10 +5,17 @@ import { FaPencilAlt, FaRegSquare, FaArrowUp, FaEraser } from "react-icons/fa";
 
 function Container() {
   const [color, setColor] = useState();
+  const [brushSize, setBrushSize] = useState(3);
 
   const handleColorChange = (e) => {
     setColor(e.target.value);
   };
+
+  const handleSizeChange = (e) => {
+    setBrushSize(e.target.value);
+  };
+
+  console.log(brushSize);
 
   return (
     <div className="container">
@@ -21,14 +28,23 @@ function Container() {
           onChange={handleColorChange}
           value={color}
           id="color-input"
-        />
+        />{" "}
         <FaPencilAlt id="item" />
+        <input
+          type="range"
+          min="0.2"
+          max="20"
+          step="0.2"
+          onChange={handleSizeChange}
+          id="brush-slider"
+        />
+        <p>{brushSize}</p>
         <FaRegSquare id="item" />
         <FaArrowUp id="item" />
         <FaEraser id="item" />
       </div>
       <div className="board-container">
-        <Board color={color}></Board>
+        <Board color={color} brush={brushSize} setColor={setColor}></Board>
       </div>
     </div>
   );
