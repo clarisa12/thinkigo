@@ -85,3 +85,11 @@ body {
   color: #c63131;
   cursor: pointer;
 }
+
+#Link {
+  text-decoration: none;
+}
+
+canvas {
+  cursor: crosshair;
+}
