@@ -19,14 +19,6 @@ function Container() {
 
   return (
     <div className="container">
-      <input
-        type="range"
-        min="0.2"
-        max="10"
-        step="0.2"
-        onChange={handleSizeChange}
-      />
-      {brushSize}
       <div className="logo-overlay">
         <h1>thinkigo</h1>
       </div>
@@ -38,6 +30,15 @@ function Container() {
           id="color-input"
         />{" "}
         <FaPencilAlt id="item" />
+        <input
+          type="range"
+          min="0.2"
+          max="20"
+          step="0.2"
+          onChange={handleSizeChange}
+          id="brush-slider"
+        />
+        <p>{brushSize}</p>
         <FaRegSquare id="item" />
         <FaArrowUp id="item" />
         <FaEraser id="item" />
