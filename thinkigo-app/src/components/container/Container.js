@@ -12,9 +12,9 @@ function Container() {
 
   return (
     <div className="container">
-      {/* <div>
-        <h1>name</h1>
-      </div> */}
+      <div className="logo-overlay">
+        <h1>thinkigo</h1>
+      </div>
       <div className="color-picker-container">
         <input
           type="color"
