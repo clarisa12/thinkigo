@@ -1,12 +1,12 @@
 Final project for Talent Garden Codemaster Bootcamp.
-Made by Clarisa Abalasei, Asrar Zarif, Adrian Fabjanski.
+Made by **Clarisa Abalasei**, **Asrar Zarif**, **Adrian Fabjanski**.
 
-PUSH:
-git add .
-git commit -m 'message'
-git push
-create a pull request and resolve conflicts. 
+# PUSH:
+*##1.git add .
+*##2.git commit -m 'message'
+*##3.git push
+*##4.create a pull request and resolve conflicts. 
 
 
-PULL:
-command to pull the latest version => <b>git pull upstream main</b>
+# PULL:
+##command to pull the latest version => <b>git pull upstream main</b>
