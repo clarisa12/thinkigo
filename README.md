@@ -9,4 +9,4 @@ Made by **Clarisa Abalasei**, **Asrar Zarif**, **Adrian Fabjanski**.
 
 
 # PULL:
-##command to pull the latest version => <b>git pull upstream main</b>
+## command to pull the latest version => <b>git pull upstream main</b>
