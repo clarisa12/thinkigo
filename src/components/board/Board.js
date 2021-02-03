@@ -56,7 +56,9 @@ function Board(props) {
 
   return (
     <div className="sketch" id="sketch">
-      <button onClick={clear}>clear</button>
+      <button onClick={clear} id="clear-btn">
+        Clear board
+      </button>
       <canvas
         ref={canvasRef}
         width={props.width || width}

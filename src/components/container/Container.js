@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Board from "../board/Board";
 import "./Container.css";
 import { FaPencilAlt, FaRegSquare, FaArrowUp, FaEraser } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 function Container() {
   const [color, setColor] = useState();
@@ -19,9 +20,11 @@ function Container() {
 
   return (
     <div className="container">
-      <div className="logo-overlay">
-        <h1>thinkigo</h1>
-      </div>
+      <Link to="/">
+        <div className="logo-overlay">
+          <h1 id="logo-overlay-text">thinkigo</h1>
+        </div>
+      </Link>
       <div className="color-picker-container">
         <input
           type="color"
@@ -35,6 +38,7 @@ function Container() {
           min="0.2"
           max="20"
           step="0.2"
+          value={brushSize}
           onChange={handleSizeChange}
           id="brush-slider"
         />

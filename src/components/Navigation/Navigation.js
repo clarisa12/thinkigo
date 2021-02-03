@@ -6,18 +6,20 @@ import { FaLayerGroup, FaBell } from "react-icons/fa";
 function Navigation() {
   return (
     <div id="nav-container">
-      <ul>
-        <li>
-          <Link to="/dashboard">
-            <FaLayerGroup id="nav-icon" />
-          </Link>
-        </li>
-        <li>
-          <Link to="/notifications">
-            <FaBell id="nav-icon" />
-          </Link>
-        </li>
-      </ul>
+      <div className="nav-icons-container">
+        <ul>
+          <li>
+            <Link to="/">
+              <FaLayerGroup className="nav-icon" />
+            </Link>
+          </li>
+          <li>
+            <Link to="/notifications">
+              <FaBell className="nav-icon" />
+            </Link>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React from "react";
 import "./Login.css";
 import "./Link.css";
 import { Link } from "react-router-dom";
+import loginIllu from "./undraw_right_places_h9n3.svg";
 
 export default function Login() {
   return (
@@ -36,7 +37,15 @@ export default function Login() {
             </form>
           </div>
         </div>
-        <div className="login-container-right"></div>
+        <div className="login-container-right">
+          <div className="login-right-text-box">
+            <h3 className="login-container-right-text">DRAW</h3>
+            <h2 className="login-container-right-text">PLAY</h2>
+            <h1 className="login-container-right-text">PLAN</h1>
+            <h1 id="login-container-right-main">HAVE FUN!</h1>
+            <img src={loginIllu} height="300px" draggable="false" />
+          </div>
+        </div>
       </div>
     </div>
   );

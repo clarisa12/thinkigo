@@ -1,8 +1,13 @@
 #nav-container {
-  position: absolute;
+  position: fixed;
   height: 100vh;
   width: 80px;
-  background-color: #c63131;
+  background: linear-gradient(
+    180deg,
+    rgba(198, 49, 49, 1) 1%,
+    rgba(119, 24, 24, 1) 100%
+  );
+  box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
 }
 
 ul {
@@ -19,13 +24,17 @@ Link {
   text-decoration: none;
 }
 
-#nav-icon {
+.nav-icons-container {
+  margin-top: 20px;
+}
+
+.nav-icon {
   font-size: 25px;
   padding: 15px;
   color: whitesmoke;
   transition: 0.3s ease;
 }
 
-#nav-icon:hover {
+.nav-icon:hover {
   transform: scale(0.9);
 }

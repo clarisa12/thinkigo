@@ -7,3 +7,15 @@
   width: 100%;
   height: 100%;
 }
+
+#clear-btn {
+  margin-top: 10px;
+  cursor: pointer;
+  padding: 5px;
+  width: 130px;
+  background-color: #c63131;
+  color: #f8f8f8;
+  outline: none;
+  border: none;
+  top: 2%;
+}
