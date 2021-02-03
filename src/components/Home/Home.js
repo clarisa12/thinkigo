@@ -3,7 +3,7 @@ import Dashboard from "../Dashboard/Dashboard";
 import Login from "../Login/Login";
 
 function Home() {
-  const [isLogged, setisLogged] = useState(false);
+  const [isLogged, setisLogged] = useState(true);
 
   if (!isLogged) {
     return <Login />;

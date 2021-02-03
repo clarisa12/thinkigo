@@ -16,8 +16,6 @@ function Container() {
     setBrushSize(e.target.value);
   };
 
-  console.log(brushSize);
-
   return (
     <div className="container">
       <Link to="/">
