@@ -2,12 +2,37 @@ import React, { useState } from "react";
 import Navigation from "../Navigation/Navigation";
 import "./Dashboard.css";
 import Search from "./Search";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaPencilAlt, FaGamepad } from "react-icons/fa";
 import Modal from "react-modal";
 import { Link } from "react-router-dom";
 
 function Dashboard() {
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const customStyles = {
+    overlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.50)",
+      overflow: "hidden",
+    },
+    content: {
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      width: "50%",
+      height: "70%",
+      bottom: "auto",
+      border: "none",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "rgba(0,0,0, 0)",
+      overflow: "hidden",
+    },
+  };
 
   return (
     <div className="dashboard-container">
@@ -27,11 +52,23 @@ function Dashboard() {
         <Modal
           isOpen={modalIsOpen}
           onRequestClose={() => setModalIsOpen(false)}
+          style={customStyles}
+          id="modal"
         >
-          <Link to="/board">
-            <h1>New board</h1>
-          </Link>
-          <button onClick={() => setModalIsOpen(false)}>close</button>
+          <div className="modal-container">
+            <Link to="/board">
+              <div className="add-new-board-block-modal">
+                <h2 id="modal-block-text">New drawing board</h2>
+                <FaPencilAlt id="modal-icon" />
+              </div>
+            </Link>
+            <Link to="/board">
+              <div className="add-new-board-block-modal">
+                <h2 id="modal-block-text">New quiz board</h2>
+                <FaGamepad id="modal-icon" />
+              </div>
+            </Link>
+          </div>
         </Modal>
         <div className="board-block">
           <h3 className="board-name">Board name</h3>

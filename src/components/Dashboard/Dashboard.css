@@ -67,6 +67,24 @@ body {
   transition: 0.4s ease;
 }
 
+.add-new-board-block-modal {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+  width: 400px;
+  height: 300px;
+  margin: 20px;
+  background-color: rgba(255, 255, 255, 1);
+  cursor: pointer;
+  transition: 0.4s ease;
+}
+.add-new-board-block-modal:hover {
+  -webkit-box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
+  box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.1);
+  transform: scale(1.03);
+}
+
 .add-new-board-block:hover {
   -webkit-box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
   box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.1);
@@ -76,4 +94,47 @@ body {
 #add-new-board-icon {
   font-size: 40px;
   margin-top: 25px;
+}
+
+.modal-container {
+  height: 60%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+
+#modal-close {
+  height: 30px;
+}
+
+#modal-block-text {
+  color: #2b2b2b;
+  margin-top: 50px;
+  height: 40px;
+}
+
+#modal-icon {
+  color: #2b2b2b;
+  margin-top: 25px;
+  font-size: 80px;
+  align-self: center;
+}
+
+@media only screen and (max-width: 1550px) {
+  .add-new-board-block-modal {
+    width: 300px;
+  }
+}
+
+@media only screen and (max-width: 1080px) {
+  .modal-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  #modal {
+    width: 100%;
+  }
 }

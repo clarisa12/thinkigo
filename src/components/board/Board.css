@@ -8,8 +8,17 @@
   height: 100%;
 }
 
+.btns-container {
+  align-items: center;
+  display: flex;
+  justify-content: space-around;
+  height: 5%;
+  width: 250px;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
 #clear-btn {
-  margin-top: 10px;
   cursor: pointer;
   padding: 5px;
   width: 130px;
@@ -17,5 +26,13 @@
   color: #f8f8f8;
   outline: none;
   border: none;
-  top: 2%;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+}
+
+.undo-redo {
+  padding: 10px;
+  font-size: 20px;
+  cursor: pointer;
 }

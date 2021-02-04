@@ -5,7 +5,7 @@ import { FaPencilAlt, FaRegSquare, FaArrowUp, FaEraser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 function Container() {
-  const [color, setColor] = useState();
+  const [color, setColor] = useState("black");
   const [brushSize, setBrushSize] = useState(3);
 
   const handleColorChange = (e) => {
