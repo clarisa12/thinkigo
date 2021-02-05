@@ -3,8 +3,12 @@ import "./Login.css";
 import "./Link.css";
 import { Link } from "react-router-dom";
 import loginIllu from "./undraw_right_places_h9n3.svg";
+import { useDispatch } from "react-redux";
+import { login } from "../../actions/index";
 
 export default function Login() {
+  const dispatch = useDispatch();
+
   return (
     <div>
       <div className="login-container-grid">
@@ -14,7 +18,7 @@ export default function Login() {
             <h1 id="login-header-h1">Thinkigo</h1>
           </div>
           <div className="form-container">
-            <form id="login-form">
+            <form id="login-form" onSubmit={() => dispatch(login())}>
               <input
                 type="email"
                 placeholder="Email Address"
@@ -43,7 +47,12 @@ export default function Login() {
             <h2 className="login-container-right-text">PLAY</h2>
             <h1 className="login-container-right-text">PLAN</h1>
             <h1 id="login-container-right-main">HAVE FUN!</h1>
-            <img src={loginIllu} height="300px" draggable="false" />
+            <img
+              src={loginIllu}
+              height="300px"
+              draggable="false"
+              alt="main-logo"
+            />
           </div>
         </div>
       </div>

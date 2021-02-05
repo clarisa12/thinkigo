@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React from "react";
 import Dashboard from "../Dashboard/Dashboard";
 import Login from "../Login/Login";
+import { useSelector } from "react-redux";
 
 function Home() {
-  const [isLogged, setisLogged] = useState(true);
+  const isLogged = useSelector((state) => state.loggedReducer);
 
   if (!isLogged) {
     return <Login />;
   }
 
-  return <Dashboard />;
+  return (
+    <div>
+      <Dashboard />
+    </div>
+  );
 }
 
 export default Home;

@@ -8,8 +8,12 @@ import {
   FaUserPlus,
   FaQuestionCircle,
 } from "react-icons/fa";
+import { login } from "../../actions/index";
+import { useDispatch } from "react-redux";
 
 function Navigation() {
+  const dispatch = useDispatch();
+
   return (
     <div id="nav-container">
       <div id="nav-container-first-row">
@@ -27,9 +31,7 @@ function Navigation() {
         <Link to="/notifications">
           <FaQuestionCircle className="nav-icon" />
         </Link>
-        <Link to="/notifications">
-          <FaUserAlt className="nav-icon" />
-        </Link>
+        <FaUserAlt className="nav-icon" onClick={() => dispatch(login())} />
       </div>
     </div>
   );

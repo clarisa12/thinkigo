@@ -3,12 +3,13 @@ import useWindowSize from "./useWindowSize";
 import "./Board.css";
 import { FaRedo, FaUndo } from "react-icons/fa";
 import UndoCanvas from "undo-canvas";
+import InfiniteCanvas from "ef-infinite-canvas";
 
 function Board(props) {
   const [drawing, setDrawing] = useState(false);
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
-  const [image, setImage] = useState();
+  // const [image, setImage] = useState();
   const [tool, setTool] = useState("brush");
 
   const canvasRef = useRef();
