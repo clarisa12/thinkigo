@@ -22,5 +22,5 @@ dbConnection.on(
     console.error.bind(console, "MongoDB connection error:")
 );
 
-const { HTTP_PORT } = process.env;
-app.listen(HTTP_PORT, () => console.log(`Server on port ${HTTP_PORT}`));
+const { PORT } = process.env;
+app.listen(PORT, () => console.log(`Server on port ${PORT}`));
