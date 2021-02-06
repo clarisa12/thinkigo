@@ -1,13 +1,39 @@
-import WebSocket from "ws";
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
 
-console.log(process.env.WS_PORT);
-const wss = new WebSocket.Server({ port: process.env.WS_PORT });
+const httpServer = createServer();
 
-wss.on("connection", (ws) => {
-    ws.on("message", (message) => {
-        console.log(`Received message => ${message}`);
-    });
-    ws.send("ho!");
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
 });
 
-export default wss;
+/**
+ *
+ * @param {Socket} socket
+ */
+const socketListener = (socket) => {
+  socket.on("send-coords", (coords) => {
+    socket.broadcast.emit("receive-coords", coords);
+  });
+
+  socket.on("start-drawing", (coords) => {
+    socket.broadcast.emit("start-drawing", coords);
+  });
+
+  socket.on("stop-drawing", () => {
+    socket.broadcast.emit("stop-drawing");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("disconnected");
+  });
+};
+
+io.on("connection", socketListener);
+
+httpServer.listen(4040);
+
+export default io;
