@@ -1,5 +1,4 @@
-import { UserModel } from "../models/userModel.js";
-import { getJWTTokenFromHeader } from "../jwt/utils.js";
+import { UserModel } from "../models/UserModel.js";
 
 export const createUser = async (req, res) => {
     const { body } = req;
