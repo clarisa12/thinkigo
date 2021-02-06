@@ -1,4 +1,4 @@
-import { UserModel } from "../models/userModel.js";
+import { UserModel } from "../models/UserModel.js";
 
 export const handleSignIn = async (req, res) => {
     const { email, password } = req.body;
