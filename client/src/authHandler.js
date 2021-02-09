@@ -3,6 +3,7 @@
  */
 const LS_KEY = "jwt_token";
 const getApiPath = (path) => {
+    console.log(process.env.REACT_APP_API_HOST + path)
     return process.env.REACT_APP_API_HOST + path;
 };
 

@@ -48,3 +48,20 @@ export const getUserInfo = async (req, res) => {
         },
     });
 };
+
+export const getUserBoards = async (req, res) => {
+    let email = req.query.email;
+
+    const user = await (await UserModel.findOne({ email })).populate("boards");
+
+    if (!user) {
+        return res
+            .status(404)
+            .json({ success: false, error: `Account not found` });
+    }
+
+    return res.status(200).json({
+        success: true,
+        user: user,
+    });
+};

@@ -12,6 +12,11 @@ export const handleSignIn = async (req, res) => {
 
     res.json({
         success: true,
+        userData: {
+            fname: user.fname,
+            lname: user.lname,
+            email: user.email,
+        },
         token: user.generateJWT(),
     });
 };

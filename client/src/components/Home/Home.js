@@ -1,20 +1,8 @@
 import React from "react";
 import Dashboard from "../Dashboard/Dashboard";
-import Login from "../Login/Login";
-import { useSelector } from "react-redux";
-
+import ProtectedRoute from "../../ProtectedRoute";
 function Home() {
-  const isLogged = useSelector((state) => state.loggedReducer);
-
-  if (!isLogged) {
-    return <Login />;
-  }
-
-  return (
-    <div>
-      <Dashboard />
-    </div>
-  );
+    return <ProtectedRoute component={Dashboard} />;
 }
 
 export default Home;
