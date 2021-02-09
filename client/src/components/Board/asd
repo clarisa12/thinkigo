@@ -1,0 +1,1094 @@
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
+import "./Board.css";
+import { FaRedo, FaUndo } from "react-icons/fa";
+import UndoCanvas from "undo-canvas";
+
+function Board(props) {
+  const [drawing, setDrawing] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+  // const [image, setImage] = useState();
+  const [tool, setTool] = useState("brush");
+
+  const canvasRef = useRef();
+  const ctx = useRef();
+
+  useEffect(() => {
+    ctx.current = canvasRef.current.getContext("2d");
+    UndoCanvas.enableUndo(ctx.current);
+  }, []);
+
+  let startX = 0;
+  let startY = 0;
+
+  function drawOval(x, y) {
+    ctx.current.clearRect(0, 0, width, height);
+    ctx.current.beginPath();
+    ctx.current.moveTo(startX, startY + (y - startY) / 2);
+    ctx.current.bezierCurveTo(
+      startX,
+      startY,
+      x,
+      startY,
+      x,
+      startY + (y - startY) / 2
+    );
+    ctx.current.bezierCurveTo(
+      x,
+      y,
+      startX,
+      y,
+      startX,
+      startY + (y - startY) / 2
+    );
+    ctx.current.closePath();
+    ctx.current.stroke();
+  }
+
+  const drawRect = () => {};
+
+  const clear = () => {
+    ctx.current.clearRect(0, 0, width, height);
+  };
+
+  function handleMouseMove(e) {
+    const coords = [
+      e.clientX - canvasRef.current.offsetLeft,
+      e.clientY - canvasRef.current.offsetTop,
+    ];
+    if (tool === "brush") {
+      if (drawing) {
+        ctx.current.lineTo(...coords);
+        ctx.current.stroke();
+      }
+      if (props.handleMouseMove) {
+        props.handleMouseMove(...coords);
+      }
+    } else if (tool === "rect") {
+      if (drawing) {
+        e.preventDefault();
+        e.stopPropagation();
+        let mouseX = parseInt(e.clientX - canvasRef.current.offsetLeft);
+        let mouseY = parseInt(e.clientY - canvasRef.current.offsetTop);
+        drawRect(mouseX, mouseY);
+      }
+    } else if (tool === "oval") {
+      if (drawing) {
+        e.preventDefault();
+        e.stopPropagation();
+        let mouseX = parseInt(e.clientX - canvasRef.current.offsetLeft);
+        let mouseY = parseInt(e.clientY - canvasRef.current.offsetTop);
+        drawOval(mouseX, mouseY);
+      }
+    }
+  }
+
+  const undo = () => {
+    ctx.current.undoTag();
+  };
+  const redo = () => {
+    ctx.current.redoTag();
+  };
+
+  function startDrawing(e) {
+    if (tool === "brush") {
+      ctx.current.lineJoin = "round";
+      ctx.current.lineCap = "round";
+      ctx.current.lineWidth = props.brush;
+      ctx.current.strokeStyle = props.color;
+      ctx.current.beginPath();
+      ctx.current.moveTo(
+        e.clientX - canvasRef.current.offsetLeft,
+        e.clientY - canvasRef.current.offsetTop
+      );
+    } else if (tool === "rect") {
+      // ctx.current.beginPath();
+      startX = parseInt(e.clientX - canvasRef.current.offsetLeft);
+      startY = parseInt(e.clientY - canvasRef.current.offsetTop);
+    } else if (tool === "oval") {
+      startX = parseInt(e.clientX - canvasRef.current.offsetLeft);
+      startY = parseInt(e.clientY - canvasRef.current.offsetTop);
+    }
+    setDrawing(true);
+    ctx.current.putTag();
+  }
+
+  function stopDrawing() {
+    ctx.current.closePath();
+    // setImage(canvasRef.current.toDataURL());
+    setDrawing(false);
+    ctx.current.putTag();
+  }
+
+  let scaleFactor = 1.0;
+
+  const scaleup = () => {
+    scaleFactor *= 1.1;
+    translate();
+  };
+
+  const translate = () => {
+    // ctx.current.clearRect(0, 0, width, height);
+    ctx.current.scale(scaleFactor, scaleFactor);
+    ctx.current.beginPath();
+    ctx.current.closePath();
+    ctx.current.fillStyle = "blue";
+    ctx.current.restore();
+  };
+
+  return (
+    <div className="sketch" id="sketch">
+      <div className="btns-container">
+        <button onClick={clear} id="clear-btn">
+          Clear board
+        </button>
+        <FaUndo className="undo-redo" onClick={undo} />
+        <FaRedo className="undo-redo" onClick={redo} />
+      </div>
+      <canvas
+        id="canvas"
+        ref={canvasRef}
+        width={props.width || width}
+        height={props.height || height}
+        onMouseDown={startDrawing}
+        onMouseUp={stopDrawing}
+        onMouseOut={stopDrawing}
+        onMouseMove={handleMouseMove}
+      />
+    </div>
+  );
+}
+
+export default Board;
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
+import "./Board.css";
+import { FaRedo, FaUndo } from "react-icons/fa";
+import UndoCanvas from "undo-canvas";
+import { fabric } from "fabric";
+import "../container/Container.css";
+import { FaPencilAlt, FaRegSquare, FaArrowUp, FaEraser } from "react-icons/fa";
+
+function Board(props) {
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
+
+  let $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const canvas = useRef();
+  const brush = useRef();
+
+  useEffect(() => {
+    canvas.current = new fabric.Canvas("canvas", {
+      isDrawingMode: true,
+    });
+
+    brush.current = canvas.current.freeDrawingBrush;
+  }, []);
+
+  var drawingModeEl = $("drawing-mode"),
+    drawingOptionsEl = $("drawing-mode-options"),
+    drawingColorEl = $("drawing-color"),
+    drawingShadowColorEl = $("drawing-shadow-color"),
+    drawingLineWidthEl = $("drawing-line-width"),
+    drawingShadowWidth = $("drawing-shadow-width"),
+    drawingShadowOffset = $("drawing-shadow-offset"),
+    clearEl = $("clear-canvas");
+
+  const clear = () => {
+    canvas.current.clear();
+  };
+
+  const handleColorChange = (e) => {
+    brush.current.color = e.target.value;
+  };
+
+  const handleBrushsizeChange = (e) => {
+    brush.current.width = e.target.value;
+    console.log(brush.current.width);
+  };
+
+  return (
+    <div className="sketch" id="sketch">
+      <div className="btns-container">
+        <button onClick={clear} id="clear-btn">
+          Clear board
+        </button>
+        {/* <FaUndo className="undo-redo" onClick={undo} />
+        <FaRedo className="undo-redo" onClick={redo} />  */}
+      </div>
+      <canvas
+        id="canvas"
+        ref={canvas}
+        width={props.width || width}
+        height={props.height || height}
+        // onMouseDown={startDrawing}
+        // onMouseUp={stopDrawing}
+        // onMouseOut={stopDrawing}
+        // onMouseMove={handleMouseMove}
+      />
+      <div className="color-picker-container">
+        <input type="color" id="color-input" onChange={handleColorChange} />{" "}
+        <FaPencilAlt id="item" />
+        <input
+          type="range"
+          min="0.2"
+          max="20"
+          step="0.2"
+          id="brush-slider"
+          onChange={handleBrushsizeChange}
+        />
+        <FaRegSquare id="item" />
+        <FaArrowUp id="item" />
+        <FaEraser id="item" />
+      </div>
+    </div>
+  );
+}
+
+export default Board;
+
+
+/////////////////
+
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
+import "./Board.css";
+import { FaRedo, FaUndo } from "react-icons/fa";
+import UndoCanvas from "undo-canvas";
+import { fabric } from "fabric";
+import "../container/Container.css";
+import { FaPencilAlt, FaRegSquare, FaArrowUp, FaEraser } from "react-icons/fa";
+
+function Board(props) {
+  const [brushSize, setBrushSize] = useState();
+
+  let $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const canvas = useRef();
+  const brush = useRef();
+  let brushSlider = useRef();
+
+  useEffect(() => {
+    canvas.current = new fabric.Canvas("canvas", {
+      isDrawingMode: true,
+    });
+
+    brush.current = canvas.current.freeDrawingBrush;
+  }, []);
+
+  var drawingModeEl = $("drawing-mode"),
+    drawingOptionsEl = $("drawing-mode-options"),
+    drawingColorEl = $("drawing-color"),
+    drawingShadowColorEl = $("drawing-shadow-color"),
+    drawingLineWidthEl = $("drawing-line-width"),
+    drawingShadowWidth = $("drawing-shadow-width"),
+    drawingShadowOffset = $("drawing-shadow-offset"),
+    clearEl = $("clear-canvas");
+
+  const clear = () => {
+    canvas.current.clear();
+  };
+
+  const handleColorChange = (e) => {
+    brush.current.color = e.target.value;
+  };
+
+  const handleBrushChange = (e) => {
+    brush.current.width = e.target.value;
+    setBrushSize(e.target.value);
+  };
+
+  const changeDrawingMode = () => {
+    canvas.current.isDrawingMode = !canvas.current.isDrawingMode;
+  };
+
+  return (
+    <div className="sketch" id="sketch">
+      <div className="btns-container">
+        <button onClick={clear} id="clear-btn">
+          Clear board
+        </button>
+        {/* <FaUndo className="undo-redo" onClick={undo} />
+        <FaRedo className="undo-redo" onClick={redo} />  */}
+      </div>
+      <button onClick={changeDrawingMode}>changeDrawingMode</button>
+      <canvas
+        id="canvas"
+        ref={canvas}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        // onMouseDown={startDrawing}
+        // onMouseUp={stopDrawing}
+        // onMouseOut={stopDrawing}
+        // onMouseMove={handleMouseMove}
+      />
+      <div className="color-picker-container">
+        <input type="color" id="color-input" onChange={handleColorChange} />{" "}
+        <FaPencilAlt id="item" />
+        <input
+          type="range"
+          min="1"
+          max="50"
+          step="1"
+          id="brush-slider"
+          onChange={handleBrushChange}
+        />
+        <p>{brushSize}</p>
+        <FaRegSquare id="item" />
+        <FaArrowUp id="item" />
+        <FaEraser id="item" />
+      </div>
+    </div>
+  );
+}
+
+export default Board;
+
+
+
+
+
+
+
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
+import "./Board.css";
+import { FaRedo, FaUndo } from "react-icons/fa";
+import UndoCanvas from "undo-canvas";
+import { fabric } from "fabric";
+import "../Container/Container.css";
+import {
+  FaPencilAlt,
+  FaRegSquare,
+  FaArrowUp,
+  FaEraser,
+  FaMousePointer,
+} from "react-icons/fa";
+
+function Board(props) {
+  const [brushSize, setBrushSize] = useState(1);
+  const [drawing, setDrawing] = useState(false);
+
+  let rectangle;
+  let isDown = false;
+  let origX;
+  let origY;
+
+  let $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const canvas = useRef();
+  const brush = useRef();
+
+  useEffect(() => {
+    canvas.current = new fabric.Canvas("canvas", {
+      isDrawingMode: true,
+      selection: true,
+    });
+    brush.current = canvas.current.freeDrawingBrush;
+    canvas.current.on("after:render", function () {
+      canvas.current.calcOffset();
+    });
+    canvas.current.on("mouse:wheel", function (opt) {
+      var delta = opt.e.deltaY;
+      var zoom = canvas.current.getZoom();
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20;
+      if (zoom < 0.01) zoom = 0.01;
+      canvas.current.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+    });
+
+    canvas.current.on("mouse:down", function (opt) {
+      var evt = opt.e;
+      if (evt.altKey === true) {
+        this.isDragging = true;
+        this.selection = false;
+        this.lastPosX = evt.clientX;
+        this.lastPosY = evt.clientY;
+      }
+    });
+    canvas.current.on("mouse:move", function (opt) {
+      if (this.isDragging) {
+        canvas.current.isDrawingMode = false;
+        var e = opt.e;
+        var vpt = this.viewportTransform;
+        vpt[4] += e.clientX - this.lastPosX;
+        vpt[5] += e.clientY - this.lastPosY;
+        this.requestRenderAll();
+        this.lastPosX = e.clientX;
+        this.lastPosY = e.clientY;
+      }
+    });
+    canvas.current.on("mouse:up", function (opt) {
+      this.setViewportTransform(this.viewportTransform);
+      this.isDragging = false;
+      this.selection = true;
+    });
+  }, []);
+
+  const clear = () => {
+    canvas.current.clear();
+  };
+
+  const handleColorChange = (e) => {
+    brush.current.color = e.target.value;
+  };
+
+  const handleBrushChange = (e) => {
+    brush.current.width = e.target.value;
+    setBrushSize(e.target.value);
+  };
+
+  const disableRectangle = () => {
+    // canvas.current.selection = true;
+    // canvas.current.off("mouse:down");
+    // canvas.current.off("mouse:move");
+    // canvas.current.off("mouse:up");
+  };
+
+  const enableDrawingMode = () => {
+    canvas.current.isDrawingMode = true;
+    disableRectangle();
+  };
+
+  const disableDrawingMode = () => {
+    canvas.current.isDrawingMode = false;
+    disableRectangle();
+  };
+
+  function deleteSelectedObjectsFromCanvas(e) {
+    if (canvas.current && e.key === "Delete") {
+      var selection = canvas.current.getActiveObject();
+      if (selection && selection.type === "activeSelection") {
+        selection.forEachObject(function (element) {
+          console.log(element);
+          canvas.current.remove(element);
+        });
+      } else {
+        canvas.current.remove(selection);
+      }
+      canvas.current.discardActiveObject();
+      canvas.current.requestRenderAll();
+    }
+  }
+
+  document.addEventListener("keyup", deleteSelectedObjectsFromCanvas, false);
+
+  // function draw() {
+  //   canvas.current.on("mouse:down", onMouseDown);
+  //   canvas.current.on("mouse:move", onMouseMove);
+  //   canvas.current.on("mouse:up", onMouseUp);
+  // }
+
+  // function onMouseDown(o) {
+  //   var pointer = canvas.current.getPointer(o.e);
+  //   isDown = true;
+  //   canvas.current.isDrawingMode = false;
+  //   origX = pointer.x;
+  //   origY = pointer.y;
+
+  //   rectangle = new fabric.Rect({
+  //     left: origX,
+  //     top: origY,
+  //     fill: "transparent",
+  //     stroke: props.color,
+  //     strokeWidth: props.brush,
+  //     selectable: true,
+  //   });
+  //   canvas.current.add(rectangle);
+  // }
+
+  // function onMouseMove(o) {
+  //   if (!isDown) return;
+  //   var pointer = canvas.current.getPointer(o.e);
+  //   if (origX > pointer.x) {
+  //     rectangle.set({
+  //       left: Math.abs(pointer.x),
+  //     });
+  //   }
+  //   if (origY > pointer.y) {
+  //     rectangle.set({
+  //       top: Math.abs(pointer.y),
+  //     });
+  //   }
+
+  //   rectangle.set({
+  //     width: Math.abs(origX - pointer.x),
+  //   });
+  //   rectangle.set({
+  //     height: Math.abs(origY - pointer.y),
+  //   });
+  //   canvas.current.renderAll();
+  // }
+
+  // function onMouseUp(o) {
+  //   rectangle.setCoords();
+  //   isDown = false;
+  // }
+
+  return (
+    <div className="sketch" id="sketch">
+      <div className="btns-container">
+        <button onClick={clear} id="clear-btn">
+          Clear board
+        </button>
+        {/* <button onClick={draw}>rectangle</button> */}
+      </div>
+      <canvas
+        id="canvas"
+        ref={canvas}
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+      <div className="color-picker-container">
+        <input type="color" id="color-input" onChange={handleColorChange} />{" "}
+        <FaMousePointer id="item" onClick={disableDrawingMode} />
+        <FaPencilAlt id="item" onClick={enableDrawingMode} />
+        <input
+          type="range"
+          min="1"
+          max="50"
+          step="1"
+          value={brushSize}
+          id="brush-slider"
+          onChange={handleBrushChange}
+        />
+        <p>{brushSize}</p>
+        <FaRegSquare id="item" />
+        <FaArrowUp id="item" />
+        <FaEraser id="item" />
+      </div>
+    </div>
+  );
+}
+
+export default Board;
+
+
+/////////////////////////////////////////////////////////////////
+
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
+import "./Board.css";
+import { FaRedo, FaUndo } from "react-icons/fa";
+import UndoCanvas from "undo-canvas";
+import { fabric } from "fabric";
+import "../Container/Container.css";
+import {
+  FaPencilAlt,
+  FaRegSquare,
+  FaArrowUp,
+  FaEraser,
+  FaMousePointer,
+} from "react-icons/fa";
+
+function Board(props) {
+  const [brushSize, setBrushSize] = useState(1);
+  const [drawing, setDrawing] = useState(false);
+
+  let rectangle;
+  let isDown = false;
+  let origX;
+  let origY;
+
+  let $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const canvas = useRef();
+  const brush = useRef();
+
+  useEffect(() => {
+    canvas.current = new fabric.Canvas("canvas", {
+      isDrawingMode: true,
+      selection: true,
+    });
+    brush.current = canvas.current.freeDrawingBrush;
+    canvas.current.on("after:render", function () {
+      canvas.current.calcOffset();
+    });
+    canvas.current.on("mouse:wheel", function (opt) {
+      var delta = opt.e.deltaY;
+      var zoom = canvas.current.getZoom();
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20;
+      if (zoom < 0.01) zoom = 0.01;
+      canvas.current.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+    });
+
+    canvas.current.on("mouse:down", function (opt) {
+      var evt = opt.e;
+      if (evt.altKey === true) {
+        this.isDragging = true;
+        this.selection = false;
+        this.lastPosX = evt.clientX;
+        this.lastPosY = evt.clientY;
+      }
+    });
+    canvas.current.on("mouse:move", function (opt) {
+      if (this.isDragging) {
+        canvas.current.isDrawingMode = false;
+        var e = opt.e;
+        var vpt = this.viewportTransform;
+        vpt[4] += e.clientX - this.lastPosX;
+        vpt[5] += e.clientY - this.lastPosY;
+        this.requestRenderAll();
+        this.lastPosX = e.clientX;
+        this.lastPosY = e.clientY;
+      }
+    });
+    canvas.current.on("mouse:up", function (opt) {
+      this.setViewportTransform(this.viewportTransform);
+      this.isDragging = false;
+      this.selection = true;
+    });
+  }, []);
+
+  const clear = () => {
+    canvas.current.clear();
+  };
+
+  const handleColorChange = (e) => {
+    brush.current.color = e.target.value;
+  };
+
+  const handleBrushChange = (e) => {
+    brush.current.width = e.target.value;
+    setBrushSize(e.target.value);
+  };
+
+  const disableRectangle = () => {
+    // canvas.current.selection = true;
+    // canvas.current.off("mouse:down");
+    // canvas.current.off("mouse:move");
+    // canvas.current.off("mouse:up");
+  };
+
+  const enableDrawingMode = () => {
+    canvas.current.isDrawingMode = true;
+    disableRectangle();
+  };
+
+  const disableDrawingMode = () => {
+    canvas.current.isDrawingMode = false;
+    disableRectangle();
+  };
+
+  function deleteSelectedObjectsFromCanvas(e) {
+    if (canvas.current && e.key === "Delete") {
+      var selection = canvas.current.getActiveObject();
+      if (selection && selection.type === "activeSelection") {
+        selection.forEachObject(function (element) {
+          console.log(element);
+          canvas.current.remove(element);
+        });
+      } else {
+        canvas.current.remove(selection);
+      }
+      canvas.current.discardActiveObject();
+      canvas.current.requestRenderAll();
+    }
+  }
+
+  document.addEventListener("keyup", deleteSelectedObjectsFromCanvas, false);
+
+  // function draw() {
+  //   canvas.current.on("mouse:down", onMouseDown);
+  //   canvas.current.on("mouse:move", onMouseMove);
+  //   canvas.current.on("mouse:up", onMouseUp);
+  // }
+
+  // function onMouseDown(o) {
+  //   var pointer = canvas.current.getPointer(o.e);
+  //   isDown = true;
+  //   canvas.current.isDrawingMode = false;
+  //   origX = pointer.x;
+  //   origY = pointer.y;
+
+  //   rectangle = new fabric.Rect({
+  //     left: origX,
+  //     top: origY,
+  //     fill: "transparent",
+  //     stroke: props.color,
+  //     strokeWidth: props.brush,
+  //     selectable: true,
+  //   });
+  //   canvas.current.add(rectangle);
+  // }
+
+  // function onMouseMove(o) {
+  //   if (!isDown) return;
+  //   var pointer = canvas.current.getPointer(o.e);
+  //   if (origX > pointer.x) {
+  //     rectangle.set({
+  //       left: Math.abs(pointer.x),
+  //     });
+  //   }
+  //   if (origY > pointer.y) {
+  //     rectangle.set({
+  //       top: Math.abs(pointer.y),
+  //     });
+  //   }
+
+  //   rectangle.set({
+  //     width: Math.abs(origX - pointer.x),
+  //   });
+  //   rectangle.set({
+  //     height: Math.abs(origY - pointer.y),
+  //   });
+  //   canvas.current.renderAll();
+  // }
+
+  // function onMouseUp(o) {
+  //   rectangle.setCoords();
+  //   isDown = false;
+  // }
+
+  return (
+    <div className="sketch" id="sketch">
+      <div className="btns-container">
+        <button onClick={clear} id="clear-btn">
+          Clear board
+        </button>
+        {/* <button onClick={draw}>rectangle</button> */}
+      </div>
+      <canvas
+        id="canvas"
+        ref={canvas}
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+      <div className="color-picker-container">
+        <input type="color" id="color-input" onChange={handleColorChange} />{" "}
+        <FaMousePointer id="item" onClick={disableDrawingMode} />
+        <FaPencilAlt id="item" onClick={enableDrawingMode} />
+        <input
+          type="range"
+          min="1"
+          max="50"
+          step="1"
+          value={brushSize}
+          id="brush-slider"
+          onChange={handleBrushChange}
+        />
+        <p>{brushSize}</p>
+        <FaRegSquare id="item" />
+        <FaArrowUp id="item" />
+        <FaEraser id="item" />
+      </div>
+    </div>
+  );
+}
+
+export default Board;
+
+
+////////////////////////////////////////////
+
+
+import React, { useEffect, useRef, useState } from "react";
+import useWindowSize from "./useWindowSize";
+import "./Board.css";
+import { FaRedo, FaUndo } from "react-icons/fa";
+import UndoCanvas from "undo-canvas";
+import { fabric } from "fabric";
+import "../Container/Container.css";
+import {
+  FaPencilAlt,
+  FaRegSquare,
+  FaArrowUp,
+  FaEraser,
+  FaMousePointer,
+  FaCircle,
+} from "react-icons/fa";
+
+function Board(props) {
+  const [brushSize, setBrushSize] = useState(1);
+  const [drawing, setDrawing] = useState(false);
+  const [circleTool, setCircleTool] = useState(false);
+  const [rectTool, setRectTool] = useState(false);
+
+  let rectangle;
+  let circle;
+  let isDown = false;
+  let origX;
+  let origY;
+
+  let $ = function (id) {
+    return document.getElementById(id);
+  };
+
+  const canvas = useRef();
+  const brush = useRef();
+
+  useEffect(() => {
+    // Create new canvas fabric
+    canvas.current = new fabric.Canvas("canvas", {
+      isDrawingMode: true,
+      selection: true,
+    });
+    // Brush variable
+    brush.current = canvas.current.freeDrawingBrush;
+
+    // Zooming and panning
+    canvas.current.on("mouse:wheel", function (opt) {
+      var delta = opt.e.deltaY;
+      var zoom = canvas.current.getZoom();
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20;
+      if (zoom < 0.01) zoom = 0.01;
+      canvas.current.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
+    });
+
+    canvas.current.on("mouse:down", function (opt) {
+      var evt = opt.e;
+      if (evt.altKey === true) {
+        this.isDragging = true;
+        this.selection = false;
+        this.lastPosX = evt.clientX;
+        this.lastPosY = evt.clientY;
+      }
+    });
+    canvas.current.on("mouse:move", function (opt) {
+      if (this.isDragging) {
+        canvas.current.isDrawingMode = false;
+        var e = opt.e;
+        var vpt = this.viewportTransform;
+        vpt[4] += e.clientX - this.lastPosX;
+        vpt[5] += e.clientY - this.lastPosY;
+        this.requestRenderAll();
+        this.lastPosX = e.clientX;
+        this.lastPosY = e.clientY;
+      }
+    });
+    canvas.current.on("mouse:up", function (opt) {
+      this.setViewportTransform(this.viewportTransform);
+      this.isDragging = false;
+      this.selection = true;
+    });
+  }, []);
+
+  // Clear
+
+  const clear = () => {
+    canvas.current.clear();
+  };
+
+  // Stroke change
+  const handleColorChange = (e) => {
+    brush.current.color = e.target.value;
+  };
+
+  const handleBrushChange = (e) => {
+    brush.current.width = e.target.value;
+    setBrushSize(e.target.value);
+  };
+
+  // Deleting objects
+  function deleteSelectedObjectsFromCanvas(e) {
+    if (canvas.current && e.key === "Delete") {
+      var selection = canvas.current.getActiveObject();
+      if (selection && selection.type === "activeSelection") {
+        selection.forEachObject(function (element) {
+          console.log(element);
+          canvas.current.remove(element);
+        });
+      } else {
+        canvas.current.remove(selection);
+      }
+      canvas.current.discardActiveObject();
+      canvas.current.requestRenderAll();
+    }
+  }
+
+  document.addEventListener("keyup", deleteSelectedObjectsFromCanvas, false);
+
+  // Drawing functions
+  const disableShape = () => {
+    canvas.current.selection = true;
+    canvas.current.off("mouse:down", onMouseDown);
+    canvas.current.off("mouse:move", onMouseMove);
+    canvas.current.off("mouse:up", onMouseUp);
+  };
+
+  const enableDrawingMode = () => {
+    canvas.current.isDrawingMode = true;
+    disableShape();
+  };
+
+  const disableDrawingMode = () => {
+    canvas.current.isDrawingMode = false;
+    disableShape();
+  };
+
+  function draw() {
+    canvas.current.selection = false;
+    canvas.current.on("mouse:down", onMouseDown);
+    canvas.current.on("mouse:move", onMouseMove);
+    canvas.current.on("mouse:up", onMouseUp);
+  }
+
+  function onMouseDown(o) {
+    if (!canvas.current.selection) {
+      var pointer = canvas.current.getPointer(o.e);
+      canvas.current.isDrawingMode = false;
+      origX = pointer.x;
+      origY = pointer.y;
+      if (rectTool) {
+        isDown = true;
+        rectangle = new fabric.Rect({
+          left: origX,
+          top: origY,
+          fill: "transparent",
+          stroke: props.color,
+          strokeWidth: props.brush,
+          selectable: true,
+        });
+        canvas.current.add(rectangle);
+      } else if (circleTool) {
+        isDown = true;
+        circle = new fabric.Circle({
+          left: pointer.x,
+          top: pointer.y,
+          radius: 1,
+          strokeWidth: 1,
+          stroke: props.color,
+          fill: "transparent",
+          selectable: true,
+          originX: "center",
+          originY: "center",
+        });
+        canvas.current.add(circle);
+      } else {
+        return;
+      }
+    }
+  }
+
+  function onMouseMove(o) {
+    if (!isDown) return;
+    var pointer = canvas.current.getPointer(o.e);
+    if (rectTool) {
+      if (origX > pointer.x) {
+        rectangle.set({
+          left: Math.abs(pointer.x),
+        });
+      }
+      if (origY > pointer.y) {
+        rectangle.set({
+          top: Math.abs(pointer.y),
+        });
+      }
+
+      rectangle.set({
+        width: Math.abs(origX - pointer.x),
+      });
+      rectangle.set({
+        height: Math.abs(origY - pointer.y),
+      });
+      canvas.current.renderAll();
+    } else if (circleTool) {
+      circle.set({ radius: Math.abs(origX - pointer.x) });
+      canvas.current.renderAll();
+    } else {
+      return;
+    }
+  }
+
+  function onMouseUp(o) {
+    isDown = false;
+    if (rectTool) {
+      rectangle.setCoords();
+    } else if (circleTool) {
+      circle.setCoords();
+    }
+  }
+
+  return (
+    <div className="sketch" id="sketch">
+      <div className="btns-container">
+        <button onClick={clear} id="clear-btn">
+          Clear board
+        </button>
+      </div>
+      <canvas
+        id="canvas"
+        ref={canvas}
+        width={window.innerWidth}
+        height={window.innerHeight}
+      />
+      <div className="color-picker-container">
+        <input type="color" id="color-input" onChange={handleColorChange} />{" "}
+        <FaMousePointer
+          id="item"
+          onClick={() => {
+            setCircleTool(false);
+            setRectTool(false);
+            disableShape();
+            disableDrawingMode();
+          }}
+        />
+        <FaPencilAlt
+          id="item"
+          onClick={() => {
+            setCircleTool(false);
+            setRectTool(false);
+            disableShape();
+            enableDrawingMode();
+          }}
+        />
+        <input
+          type="range"
+          min="1"
+          max="50"
+          step="1"
+          value={brushSize}
+          id="brush-slider"
+          onChange={handleBrushChange}
+        />
+        <p>{brushSize}</p>
+        <FaRegSquare
+          id="item"
+          onClick={() => {
+            disableShape();
+            setCircleTool(false);
+            setRectTool(true);
+            draw();
+          }}
+        />
+        <FaCircle
+          id="item"
+          onClick={() => {
+            disableShape();
+            setCircleTool(true);
+            setRectTool(false);
+            draw();
+          }}
+        />
+        <FaArrowUp id="item" />
+        <FaEraser id="item" />
+      </div>
+    </div>
+  );
+}
+
+export default Board;
