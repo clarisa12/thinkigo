@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import Board from "../Board/Board";
 import "./Container.css";
 import { Link } from "react-router-dom";
 
 function Container() {
+  const [color, setColor] = useState("black");
+  const [brushSize, setBrushSize] = useState(3);
+
   return (
     <div className="container">
       <Link to="/">
@@ -12,7 +15,7 @@ function Container() {
         </div>
       </Link>
       <div className="board-container">
-        <Board />
+        <Board color={color} brush={brushSize} setColor={setColor}></Board>
       </div>
     </div>
   );

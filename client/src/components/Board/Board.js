@@ -104,8 +104,8 @@ function Board(props) {
         } else if (tool === "circle") {
           isDown = true;
           circle = new fabric.Circle({
-            left: pointer.x,
-            top: pointer.y,
+            left: origX,
+            top: origY,
             radius: 1,
             strokeWidth: 1,
             stroke: "black",
@@ -156,7 +156,7 @@ function Board(props) {
       if (tool === "rect") {
         rectangle.current.setCoords();
       } else if (tool === "circle") {
-        // circle.setCoords();
+        circle.setCoords();
       }
     };
   }, [tool]);
