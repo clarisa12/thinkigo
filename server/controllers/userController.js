@@ -19,6 +19,11 @@ export const createUser = async (req, res) => {
             success: true,
             token: jwt,
             message: "Account created!",
+            userData: {
+                fname: user.fname,
+                lname: user.lname,
+                email: user.email,
+            },
         });
     } catch (error) {
         return res.status(400).json({
