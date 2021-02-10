@@ -255,13 +255,6 @@ function Board(props) {
   };
 
   const loadImg = () => {
-    // fabric.Image.fromURL(image, (img) => {
-    //   img.set({
-    //     width: canvas.current.width / 2,
-    //     height: canvas.current.height / 2,
-    //   });
-    //   canvas.current.add(img).renderAll().setActiveObject(img);
-    // });
     canvas.current.loadFromJSON(
       image,
       () => {

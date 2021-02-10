@@ -1,5 +1,4 @@
-import { UserModel } from "../models/userModel.js";
-import { getJWTTokenFromHeader } from "../jwt/utils.js";
+import { UserModel } from "../models/UserModel.js";
 
 export const createUser = async (req, res) => {
     const { body } = req;
@@ -20,6 +19,11 @@ export const createUser = async (req, res) => {
             success: true,
             token: jwt,
             message: "Account created!",
+            userData: {
+                fname: user.fname,
+                lname: user.lname,
+                email: user.email,
+            },
         });
     } catch (error) {
         return res.status(400).json({
@@ -47,5 +51,22 @@ export const getUserInfo = async (req, res) => {
             email: user.email,
             avatar: user.avatar,
         },
+    });
+};
+
+export const getUserBoards = async (req, res) => {
+    let email = req.query.email;
+
+    const user = await (await UserModel.findOne({ email })).populate("boards");
+
+    if (!user) {
+        return res
+            .status(404)
+            .json({ success: false, error: `Account not found` });
+    }
+
+    return res.status(200).json({
+        success: true,
+        user: user,
     });
 };
