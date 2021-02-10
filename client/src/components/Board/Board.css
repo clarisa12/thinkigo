@@ -18,8 +18,9 @@
   display: flex;
   justify-content: space-around;
   height: 5%;
-  width: 250px;
+  width: 450px;
   margin: 0 auto;
+  margin-top: 5px;
 }
 
 #clear-btn {
@@ -33,10 +34,26 @@
   -moz-user-select: none;
   -khtml-user-select: none;
   -webkit-user-select: none;
+  margin: 2px;
+}
+
+#clear-btn:active {
+  background-color: #942424;
 }
 
 .undo-redo {
   padding: 10px;
   font-size: 20px;
   cursor: pointer;
+}
+
+#board-name {
+  padding: 5px;
+  border: none;
+  background-color: #dcdcdc9e;
+}
+
+#board-name:focus {
+  outline: none;
+  border: none;
 }

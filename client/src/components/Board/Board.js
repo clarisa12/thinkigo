@@ -17,6 +17,7 @@ import {
 function Board(props) {
   const [brushSize, setBrushSize] = useState(1);
   const [tool, setTool] = useState("brush");
+  const [image, setImage] = useState();
 
   let rectangle = useRef();
   let circle;
@@ -37,6 +38,15 @@ function Board(props) {
       isDrawingMode: true,
       selection: true,
     });
+
+    canvas.current.setBackgroundImage(
+      "../img/background01.jpg",
+      canvas.current.renderAll.bind(canvas.current),
+      {
+        scaleX: canvas.current.width,
+        scaleY: canvas.current.height,
+      }
+    );
     // Brush variable
     brush.current = canvas.current.freeDrawingBrush;
 
@@ -52,9 +62,16 @@ function Board(props) {
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });
+    canvas.current.on("object:selected", function (o) {
+      var activeObj = o.target;
+      if (activeObj.get("type") == "group") {
+        activeObj.set({ borderColor: "#fbb802", cornerColor: "#fbb802" });
+      }
+    });
   }, []);
 
   useEffect(() => {
+    setTool(tool);
     enableDragging.current = () => {
       canvas.current.on("mouse:down", function (opt) {
         var evt = opt.e;
@@ -156,7 +173,9 @@ function Board(props) {
       if (tool === "rect") {
         rectangle.current.setCoords();
       } else if (tool === "circle") {
-        circle.setCoords();
+        if (circle) {
+          circle.setCoords();
+        }
       }
     };
   }, [tool]);
@@ -183,7 +202,7 @@ function Board(props) {
   };
 
   const handleBrushChange = (e) => {
-    brush.current.width = e.target.value;
+    brush.current.width = parseInt(e.target.value, 10);
     setBrushSize(e.target.value);
   };
 
@@ -224,17 +243,47 @@ function Board(props) {
   };
 
   function draw() {
+    canvas.current.isDrawingMode = false;
     canvas.current.selection = false;
     canvas.current.on("mouse:down", onMouseDown.current);
     canvas.current.on("mouse:move", onMouseMove.current);
     canvas.current.on("mouse:up", onMouseUp.current);
   }
 
+  const saveImg = () => {
+    setImage(canvas.current.toJSON());
+  };
+
+  const loadImg = () => {
+    // fabric.Image.fromURL(image, (img) => {
+    //   img.set({
+    //     width: canvas.current.width / 2,
+    //     height: canvas.current.height / 2,
+    //   });
+    //   canvas.current.add(img).renderAll().setActiveObject(img);
+    // });
+    canvas.current.loadFromJSON(
+      image,
+      () => {
+        canvas.current.renderAll();
+        canvas.current.calcOffset();
+      },
+      (o, object) => canvas.current.setActiveObject(object)
+    );
+  };
+
   return (
     <div className="sketch" id="sketch">
       <div className="btns-container">
+        <input type="text" id="board-name" placeholder="Name your board..." />
         <button onClick={clear} id="clear-btn">
           Clear board
+        </button>
+        <button onClick={() => saveImg()} id="clear-btn">
+          Save Board
+        </button>
+        <button onClick={() => loadImg()} id="clear-btn">
+          load
         </button>
       </div>
       <canvas
@@ -273,7 +322,7 @@ function Board(props) {
         <input
           type="range"
           min="1"
-          max="30"
+          max="100"
           step="1"
           value={brushSize}
           id="brush-slider"
@@ -284,6 +333,7 @@ function Board(props) {
         <FaRegSquare
           id="item"
           onClick={() => {
+            canvas.current.isDrawingMode = false;
             disableShape();
             setTool("rect");
             draw();
