@@ -1092,3 +1092,73 @@ function Board(props) {
 }
 
 export default Board;
+
+
+////////////////
+<div className="color-picker-container">
+        <input
+          type="color"
+          id="color-input"
+          onChange={handleColorChange}
+          title="Color"
+        />{" "}
+        <FaMousePointer
+          id="item"
+          onClick={() => {
+            setTool("select");
+            disableDrawingMode();
+            enableDragging.current();
+          }}
+          title="Select and drag"
+        />
+        <FaPencilAlt
+          id="item"
+          onClick={() => {
+            disableShape();
+            setTool("brush");
+            disableShape();
+            enableDragging.current();
+            enableDrawingMode();
+          }}
+          title="Pencil"
+        />
+        <input
+          type="range"
+          min="1"
+          max="100"
+          step="1"
+          value={brushSize}
+          id="brush-slider"
+          onChange={handleBrushChange}
+          title="Brush size"
+        />
+        <p>{brushSize}</p>
+        <FaRegSquare
+          id="item"
+          onClick={() => {
+            disableShape();
+            setTool("rect");
+            draw();
+          }}
+          title="Rectangle"
+        />
+        <FaCircle
+          id="item"
+          onClick={() => {
+            disableShape();
+            setTool("circle");
+            draw();
+          }}
+          title="Circle"
+        />
+        <FaArrowUp id="item" />
+        <FaICursor
+          id="item"
+          onClick={() => {
+            canvas.current.add(text);
+            disableDrawingMode();
+            enableDragging.current();
+            draw();
+          }}
+        />
+      </div>
