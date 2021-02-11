@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import useWindowSize from "./useWindowSize";
 import "./Board.css";
 import { FaRedo, FaUndo } from "react-icons/fa";
-import UndoCanvas from "undo-canvas";
+import io from "socket.io-client";
+import ss from "socket.io-stream";
 import { fabric } from "fabric";
+import { fetchWrapper } from "../../fetchWrapper";
+import { DataContext } from "../../DataContext";
 import "../Container/Container.css";
 import {
   FaPencilAlt,
@@ -15,9 +18,18 @@ import {
 } from "react-icons/fa";
 
 function Board(props) {
+  const {
+    image,
+    setImage,
+    setBoardName,
+    currentId,
+    setCurrentId,
+    saveBoardInDb,
+  } = useContext(DataContext);
   const [brushSize, setBrushSize] = useState(1);
   const [tool, setTool] = useState("brush");
-  const [image, setImage] = useState();
+
+  let socket = io.connect("http://localhost:8080");
 
   let rectangle = useRef();
   let circle;
@@ -38,6 +50,10 @@ function Board(props) {
       isDrawingMode: true,
       selection: true,
     });
+
+    setCurrentId(
+      window.location.href.substring(window.location.href.lastIndexOf("/") + 1)
+    );
 
     canvas.current.setBackgroundImage(
       "../img/background01.jpg",
@@ -114,7 +130,7 @@ function Board(props) {
             top: origY,
             fill: "transparent",
             stroke: "black",
-            strokeWidth: props.brush,
+            strokeWidth: brushSize,
             selectable: true,
           });
           canvas.current.add(rectangle.current);
@@ -171,14 +187,19 @@ function Board(props) {
     onMouseUp.current = (o) => {
       isDown = false;
       if (tool === "rect") {
-        rectangle.current.setCoords();
+        if (rectangle.current) {
+          rectangle.current.setCoords();
+        }
       } else if (tool === "circle") {
         if (circle) {
           circle.setCoords();
         }
+      } else {
+        return;
       }
     };
-  }, [tool]);
+    console.log(canvas.current._activeObject);
+  }, [tool, brushSize]);
 
   let text = new fabric.Textbox("New text", {
     width: 250,
@@ -186,6 +207,14 @@ function Board(props) {
     left: 500,
     textAlign: "center",
   });
+
+  if (canvas.current) {
+    canvas.current.on("mouse:up", () => {
+      if (!canvas.current._activeObject) {
+        emitEvent();
+      }
+    });
+  }
 
   // Clear
 
@@ -252,11 +281,23 @@ function Board(props) {
 
   const saveImg = () => {
     setImage(canvas.current.toJSON());
+    // saveBoardInDb();
   };
+
+  const emitEvent = () => {
+    if (canvas.current) {
+      socket.emit("draw", canvas.current.toJSON());
+    }
+  };
+
+  socket.on("draw", (obj) => {
+    canvas.current.loadFromJSON(obj);
+    canvas.current.renderAll();
+  });
 
   const loadImg = () => {
     canvas.current.loadFromJSON(
-      image,
+      localStorage.getItem("board"),
       () => {
         canvas.current.renderAll();
         canvas.current.calcOffset();
@@ -268,7 +309,12 @@ function Board(props) {
   return (
     <div className="sketch" id="sketch">
       <div className="btns-container">
-        <input type="text" id="board-name" placeholder="Name your board..." />
+        <input
+          type="text"
+          id="board-name"
+          defaultValue="My board"
+          onChange={(e) => setBoardName(e.target.value)}
+        />
         <button onClick={clear} id="clear-btn">
           Clear board
         </button>

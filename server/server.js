@@ -22,16 +22,16 @@ app.use("/board", boardRouter);
 const server = createServer(app);
 /* creating a new socket.io server instance */
 const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-    },
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
 });
 
 // logs the db error
 dbConnection.on(
-    "error",
-    console.error.bind(console, "MongoDB connection error:")
+  "error",
+  console.error.bind(console, "MongoDB connection error:")
 );
 
 /**
@@ -39,25 +39,31 @@ dbConnection.on(
  * @param {Socket} socket
  */
 const socketListener = (socket) => {
-    //when it receives the event "send-coords", the function executes the content (socket.broadcast.emit)
-    socket.on("start-drawing", (coords) => {
-        socket.broadcast.emit("start-drawing", coords);
-    });
+  //when it receives the event "send-coords", the function executes the content (socket.broadcast.emit)
+  socket.on("draw", (data) => {
+    socket.broadcast.emit("draw", data);
+  });
 
-    socket.on("send-coords", (coords) => {
-        socket.broadcast.emit("receive-coords", coords);
-    });
+  socket.on("send-coords", (coords) => {
+    socket.broadcast.emit("receive-coords", coords);
+  });
 
-    socket.on("stop-drawing", () => {
-        socket.broadcast.emit("stop-drawing");
-    });
+  socket.on("stop-drawing", () => {
+    socket.broadcast.emit("stop-drawing");
+  });
 
-    socket.on("disconnect", () => {
-        console.log("disconnected");
-    });
+  socket.on("disconnect", () => {
+    console.log("disconnected");
+  });
 };
 
-io.on("connection", socketListener);
+io.on("connection", (socket) => {
+  console.log(socket.id);
+  socket.on("draw", (data) => {
+    socket.broadcast.emit("draw", data);
+    console.log("drawing..");
+  });
+});
 
 const { PORT } = process.env;
 server.listen(PORT, () => console.log(`Server on port ${PORT}`));
