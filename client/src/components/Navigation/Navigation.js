@@ -18,6 +18,7 @@ function Navigation() {
         </Link>
         <Link to="/">
           <FaBell className="nav-icon" />
+          <div id="bell-length">1</div>
         </Link>
       </div>
       <div id="nav-container-second-row">

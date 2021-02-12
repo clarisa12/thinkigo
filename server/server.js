@@ -38,30 +38,19 @@ dbConnection.on(
  *
  * @param {Socket} socket
  */
-const socketListener = (socket) => {
-  //when it receives the event "send-coords", the function executes the content (socket.broadcast.emit)
-  socket.on("draw", (data) => {
-    socket.broadcast.emit("draw", data);
-  });
 
-  socket.on("send-coords", (coords) => {
-    socket.broadcast.emit("receive-coords", coords);
-  });
-
-  socket.on("stop-drawing", () => {
-    socket.broadcast.emit("stop-drawing");
-  });
-
-  socket.on("disconnect", () => {
-    console.log("disconnected");
-  });
-};
+let drawingData = [];
 
 io.on("connection", (socket) => {
-  console.log(socket.id);
-  socket.on("draw", (data) => {
-    socket.broadcast.emit("draw", data);
-    console.log("drawing..");
+  // Create room
+  socket.on("create", (room) => {
+    socket.join(room);
+    console.log(`user with id ${socket.id} joined room ${room}`);
+    // Emit drawing received from client
+    socket.on("draw", (data) => {
+      drawingData.push(data);
+      socket.in(room).broadcast.emit("draw", data);
+    });
   });
 });
 

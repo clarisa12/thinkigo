@@ -1,16 +1,13 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
-import useWindowSize from "./useWindowSize";
 import "./Board.css";
-import { FaRedo, FaUndo } from "react-icons/fa";
 import io from "socket.io-client";
-import ss from "socket.io-stream";
 import { fabric } from "fabric";
-import { fetchWrapper } from "../../fetchWrapper";
 import { DataContext } from "../../DataContext";
 import "../Container/Container.css";
 import {
   FaPencilAlt,
   FaRegSquare,
+  FaShareAltSquare,
   FaArrowUp,
   FaICursor,
   FaMousePointer,
@@ -18,29 +15,28 @@ import {
 } from "react-icons/fa";
 
 function Board(props) {
-  const {
-    image,
-    setImage,
-    setBoardName,
-    currentId,
-    setCurrentId,
-    saveBoardInDb,
-  } = useContext(DataContext);
+  const { setImage, setBoardName } = useContext(DataContext);
   const [brushSize, setBrushSize] = useState(1);
-  const [tool, setTool] = useState("brush");
+  const [brushColor, setBrushColor] = useState("black");
+  // const [tool, setTool] = useState("brush");
+  const [showShare, setShowShare] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
+  const [height, setHeight] = useState(window.innerHeight);
 
-  let socket = io.connect("http://localhost:8080");
-
-  let rectangle = useRef();
+  // Variables
   let circle;
   let isDown = false;
   let origX;
   let origY;
-  let onMouseDown = useRef();
-  let onMouseUp = useRef();
-  let onMouseMove = useRef();
-  let enableDragging = useRef();
+  let tool;
 
+  // Refs
+  let rectangle = useRef();
+  // let onMouseDown = useRef();
+  // let onMouseUp = useRef();
+  // let onMouseMove = useRef();
+  // let enableDragging = useRef();
+  let socket = useRef();
   const canvas = useRef();
   const brush = useRef();
 
@@ -50,19 +46,31 @@ function Board(props) {
       isDrawingMode: true,
       selection: true,
     });
-
-    setCurrentId(
-      window.location.href.substring(window.location.href.lastIndexOf("/") + 1)
+    // Separate board id from url
+    let id = window.location.href.substring(
+      window.location.href.lastIndexOf("/") + 1
     );
 
-    canvas.current.setBackgroundImage(
-      "../img/background01.jpg",
-      canvas.current.renderAll.bind(canvas.current),
-      {
-        scaleX: canvas.current.width,
-        scaleY: canvas.current.height,
-      }
-    );
+    // Connect to socket server
+    socket.current = io.connect("http://localhost:8080");
+    socket.current.emit("create", id);
+    socket.current.on("connect", () => {
+      socket.current.emit("event");
+    });
+
+    // Receive drawing event
+    socket.current.on("draw", (obj) => {
+      let ratio = width / obj.w;
+      obj.data.objects.forEach(function (object) {
+        object.left *= ratio;
+        object.scaleX *= ratio;
+        object.top *= ratio;
+        object.scaleY *= ratio;
+      });
+      canvas.current.loadFromJSON(obj.data);
+      canvas.current.renderAll();
+    });
+
     // Brush variable
     brush.current = canvas.current.freeDrawingBrush;
 
@@ -80,126 +88,152 @@ function Board(props) {
     });
     canvas.current.on("object:selected", function (o) {
       var activeObj = o.target;
-      if (activeObj.get("type") == "group") {
+      if (activeObj.get("type") === "group") {
         activeObj.set({ borderColor: "#fbb802", cornerColor: "#fbb802" });
+      }
+    });
+
+    canvas.current.on("path:created", () => {
+      if (!canvas.current._activeObject) {
+        emitEvent();
+      }
+    });
+    canvas.current.on("object:modified", () => {
+      if (!canvas.current._activeObject) {
+        emitEvent();
       }
     });
   }, []);
 
-  useEffect(() => {
-    setTool(tool);
-    enableDragging.current = () => {
-      canvas.current.on("mouse:down", function (opt) {
-        var evt = opt.e;
-        if (evt.altKey === true) {
-          this.isDragging = true;
-          this.selection = false;
-          this.lastPosX = evt.clientX;
-          this.lastPosY = evt.clientY;
-        }
-      });
-      canvas.current.on("mouse:move", function (opt) {
-        if (this.isDragging) {
-          canvas.current.isDrawingMode = false;
-          var e = opt.e;
-          var vpt = this.viewportTransform;
-          vpt[4] += e.clientX - this.lastPosX;
-          vpt[5] += e.clientY - this.lastPosY;
-          this.requestRenderAll();
-          this.lastPosX = e.clientX;
-          this.lastPosY = e.clientY;
-        }
-      });
-      canvas.current.on("mouse:up", function (opt) {
-        this.setViewportTransform(this.viewportTransform);
-        this.isDragging = false;
-        this.selection = true;
-      });
-    };
-
-    onMouseDown.current = (o) => {
-      if (!canvas.current.selection && !canvas.current._activeObject) {
-        var pointer = canvas.current.getPointer(o.e);
+  const enableDragging = () => {
+    canvas.current.on("mouse:down", function (opt) {
+      var evt = opt.e;
+      if (evt.altKey === true) {
+        this.isDragging = true;
+        this.selection = false;
+        this.lastPosX = evt.clientX;
+        this.lastPosY = evt.clientY;
+      }
+    });
+    canvas.current.on("mouse:move", function (opt) {
+      if (this.isDragging) {
         canvas.current.isDrawingMode = false;
-        origX = pointer.x;
-        origY = pointer.y;
-        if (tool === "rect") {
-          isDown = true;
-          rectangle.current = new fabric.Rect({
-            left: origX,
-            top: origY,
-            fill: "transparent",
-            stroke: "black",
-            strokeWidth: brushSize,
-            selectable: true,
-          });
-          canvas.current.add(rectangle.current);
-        } else if (tool === "circle") {
-          isDown = true;
-          circle = new fabric.Circle({
-            left: origX,
-            top: origY,
-            radius: 1,
-            strokeWidth: 1,
-            stroke: "black",
-            fill: "transparent",
-            selectable: true,
-            originX: "center",
-            originY: "center",
-          });
-          canvas.current.add(circle);
-        } else {
-          return;
-        }
+        var e = opt.e;
+        var vpt = this.viewportTransform;
+        vpt[4] += e.clientX - this.lastPosX;
+        vpt[5] += e.clientY - this.lastPosY;
+        this.requestRenderAll();
+        this.lastPosX = e.clientX;
+        this.lastPosY = e.clientY;
       }
-    };
+    });
+    canvas.current.on("mouse:up", function (opt) {
+      this.setViewportTransform(this.viewportTransform);
+      this.isDragging = false;
+      this.selection = true;
+      emitEvent();
+    });
+  };
 
-    onMouseMove.current = (o) => {
-      if (!isDown) return;
+  const onMouseDown = (o) => {
+    if (!canvas.current.selection && !canvas.current._activeObject) {
       var pointer = canvas.current.getPointer(o.e);
+      canvas.current.isDrawingMode = false;
+      origX = pointer.x;
+      origY = pointer.y;
       if (tool === "rect") {
-        if (origX > pointer.x) {
-          rectangle.current.set({
-            left: Math.abs(pointer.x),
-          });
-        }
-        if (origY > pointer.y) {
-          rectangle.current.set({
-            top: Math.abs(pointer.y),
-          });
-        }
-
-        rectangle.current.set({
-          width: Math.abs(origX - pointer.x),
+        isDown = true;
+        rectangle.current = new fabric.Rect({
+          left: origX,
+          top: origY,
+          fill: "transparent",
+          stroke: brushColor,
+          strokeWidth: brushSize,
+          selectable: true,
         });
-        rectangle.current.set({
-          height: Math.abs(origY - pointer.y),
-        });
-        canvas.current.renderAll();
+        canvas.current.add(rectangle.current);
       } else if (tool === "circle") {
-        circle.set({ radius: Math.abs(origX - pointer.x) });
-        canvas.current.renderAll();
+        isDown = true;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        circle = new fabric.Circle({
+          left: origX,
+          top: origY,
+          radius: 1,
+          strokeWidth: brushSize,
+          stroke: brushColor,
+          fill: "transparent",
+          selectable: true,
+          originX: "center",
+          originY: "center",
+        });
+        canvas.current.add(circle);
       } else {
         return;
       }
-    };
+    }
+  };
 
-    onMouseUp.current = (o) => {
-      isDown = false;
-      if (tool === "rect") {
-        if (rectangle.current) {
-          rectangle.current.setCoords();
-        }
-      } else if (tool === "circle") {
-        if (circle) {
-          circle.setCoords();
-        }
-      } else {
-        return;
+  const onMouseMove = (o) => {
+    if (!isDown) return;
+    var pointer = canvas.current.getPointer(o.e);
+    if (tool === "rect") {
+      if (origX > pointer.x) {
+        rectangle.current.set({
+          left: Math.abs(pointer.x),
+        });
       }
-    };
-    console.log(canvas.current._activeObject);
-  }, [tool, brushSize]);
+      if (origY > pointer.y) {
+        rectangle.current.set({
+          top: Math.abs(pointer.y),
+        });
+      }
+
+      rectangle.current.set({
+        width: Math.abs(origX - pointer.x),
+      });
+      rectangle.current.set({
+        height: Math.abs(origY - pointer.y),
+      });
+      canvas.current.renderAll();
+    } else if (tool === "circle") {
+      circle.set({ radius: Math.abs(origX - pointer.x) });
+      canvas.current.renderAll();
+    } else {
+      return;
+    }
+  };
+
+  const onMouseUp = (o) => {
+    isDown = false;
+    if (tool === "rect") {
+      if (rectangle.current) {
+        rectangle.current.setCoords();
+      }
+    } else if (tool === "circle") {
+      if (circle) {
+        circle.setCoords();
+      }
+    } else {
+      return;
+    }
+    emitEvent();
+  };
+
+  // Socket event
+
+  const emitEvent = () => {
+    if (canvas.current) {
+      let json = canvas.current.toJSON();
+      let data = {
+        w: width,
+        h: height,
+        data: json,
+      };
+      socket.current.emit("draw", data);
+    }
+  };
+
+  // Text  box
 
   let text = new fabric.Textbox("New text", {
     width: 250,
@@ -208,15 +242,7 @@ function Board(props) {
     textAlign: "center",
   });
 
-  if (canvas.current) {
-    canvas.current.on("mouse:up", () => {
-      if (!canvas.current._activeObject) {
-        emitEvent();
-      }
-    });
-  }
-
-  // Clear
+  // Clear board
 
   const clear = () => {
     canvas.current.clear();
@@ -225,11 +251,13 @@ function Board(props) {
   // Stroke change
   const handleColorChange = (e) => {
     brush.current.color = e.target.value;
+    setBrushColor(e.target.value);
     if (rectangle.current) {
       rectangle.current.stroke = e.target.value;
     }
   };
 
+  // Color change
   const handleBrushChange = (e) => {
     brush.current.width = parseInt(e.target.value, 10);
     setBrushSize(e.target.value);
@@ -250,7 +278,6 @@ function Board(props) {
       canvas.current.requestRenderAll();
     }
   }
-
   document.addEventListener("keyup", deleteSelectedObjectsFromCanvas, false);
 
   // Drawing functions
@@ -274,9 +301,9 @@ function Board(props) {
   function draw() {
     canvas.current.isDrawingMode = false;
     canvas.current.selection = false;
-    canvas.current.on("mouse:down", onMouseDown.current);
-    canvas.current.on("mouse:move", onMouseMove.current);
-    canvas.current.on("mouse:up", onMouseUp.current);
+    canvas.current.on("mouse:down", onMouseDown);
+    canvas.current.on("mouse:move", onMouseMove);
+    canvas.current.on("mouse:up", onMouseUp);
   }
 
   const saveImg = () => {
@@ -284,27 +311,19 @@ function Board(props) {
     // saveBoardInDb();
   };
 
-  const emitEvent = () => {
-    if (canvas.current) {
-      socket.emit("draw", canvas.current.toJSON());
-    }
+  // Handle window resizing
+  window.onresize = () => {
+    canvas.current.setDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
   };
 
-  socket.on("draw", (obj) => {
-    canvas.current.loadFromJSON(obj);
-    canvas.current.renderAll();
-  });
-
-  const loadImg = () => {
-    canvas.current.loadFromJSON(
-      localStorage.getItem("board"),
-      () => {
-        canvas.current.renderAll();
-        canvas.current.calcOffset();
-      },
-      (o, object) => canvas.current.setActiveObject(object)
-    );
-  };
+  if (showShare) {
+    setTimeout(() => {
+      setShowShare(false);
+    }, 4000);
+  }
 
   return (
     <div className="sketch" id="sketch">
@@ -315,22 +334,33 @@ function Board(props) {
           defaultValue="My board"
           onChange={(e) => setBoardName(e.target.value)}
         />
-        <button onClick={clear} id="clear-btn">
+        <button onClick={clear} id="clear-btn" title="Clear board">
           Clear board
         </button>
-        <button onClick={() => saveImg()} id="clear-btn">
+        <button onClick={() => saveImg()} id="clear-btn" title="Save board">
           Save Board
         </button>
-        <button onClick={() => loadImg()} id="clear-btn">
-          load
-        </button>
+        <FaShareAltSquare
+          id="share-btn"
+          title="Share board"
+          onClick={() => setShowShare(!showShare)}
+        />
+        <div className={showShare ? "copy-popup active" : "copy-popup"}>
+          <input type="text" value={window.location.href} id="copy-input" />
+          <button
+            id="copy-popup-btn"
+            onClick={() => {
+              let urlCopy = document.getElementById("copy-input");
+              urlCopy.select();
+              urlCopy.setSelectionRange(0, 99999);
+              document.execCommand("copy");
+            }}
+          >
+            Copy to clipboard
+          </button>
+        </div>
       </div>
-      <canvas
-        id="canvas"
-        ref={canvas}
-        width={window.innerWidth}
-        height={window.innerHeight}
-      />
+      <canvas id="canvas" ref={canvas} width={width} height={height} />
       <div className="color-picker-container">
         <input
           type="color"
@@ -341,9 +371,9 @@ function Board(props) {
         <FaMousePointer
           id="item"
           onClick={() => {
-            setTool("select");
+            tool = "select";
             disableDrawingMode();
-            enableDragging.current();
+            enableDragging();
           }}
           title="Select and drag"
         />
@@ -351,9 +381,9 @@ function Board(props) {
           id="item"
           onClick={() => {
             disableShape();
-            setTool("brush");
+            tool = "brush";
             disableShape();
-            enableDragging.current();
+            enableDragging();
             enableDrawingMode();
           }}
           title="Pencil"
@@ -374,7 +404,7 @@ function Board(props) {
           onClick={() => {
             canvas.current.isDrawingMode = false;
             disableShape();
-            setTool("rect");
+            tool = "rect";
             draw();
           }}
           title="Rectangle"
@@ -383,7 +413,7 @@ function Board(props) {
           id="item"
           onClick={() => {
             disableShape();
-            setTool("circle");
+            tool = "circle";
             draw();
           }}
           title="Circle"
@@ -394,7 +424,7 @@ function Board(props) {
           onClick={() => {
             canvas.current.add(text);
             disableDrawingMode();
-            enableDragging.current();
+            enableDragging();
             draw();
           }}
         />
