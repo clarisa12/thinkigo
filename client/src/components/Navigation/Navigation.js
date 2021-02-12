@@ -22,9 +22,8 @@ function Navigation() {
         </Link>
       </div>
       <div id="nav-container-second-row">
-        <Link to="/notifications">
-          <FaUserPlus className="nav-icon" />
-        </Link>
+        <FaUserPlus className="nav-icon" />
+        <div id="userplus-length">9</div>
         <Link to="/notifications">
           <FaQuestionCircle className="nav-icon" />
         </Link>

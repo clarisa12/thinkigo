@@ -18,7 +18,6 @@ function Board(props) {
   const { setImage, setBoardName } = useContext(DataContext);
   const [brushSize, setBrushSize] = useState(1);
   const [brushColor, setBrushColor] = useState("black");
-  // const [tool, setTool] = useState("brush");
   const [showShare, setShowShare] = useState(false);
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
@@ -32,10 +31,6 @@ function Board(props) {
 
   // Refs
   let rectangle = useRef();
-  // let onMouseDown = useRef();
-  // let onMouseUp = useRef();
-  // let onMouseMove = useRef();
-  // let enableDragging = useRef();
   let socket = useRef();
   const canvas = useRef();
   const brush = useRef();
@@ -313,16 +308,18 @@ function Board(props) {
 
   // Handle window resizing
   window.onresize = () => {
-    canvas.current.setDimensions({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    });
+    if (canvas.current) {
+      canvas.current.setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
   };
 
   if (showShare) {
     setTimeout(() => {
       setShowShare(false);
-    }, 4000);
+    }, 7000);
   }
 
   return (

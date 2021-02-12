@@ -2,13 +2,14 @@ import React from "react";
 import Board from "../Board/Board";
 import "./Container.css";
 import { Link } from "react-router-dom";
+import logo from "../img/logo.png";
 
 function Container() {
   return (
     <div className="container">
       <Link to="/">
         <div className="logo-overlay">
-          <h1 id="logo-overlay-text">thinkigo</h1>
+          <img src={logo} width="240px" />
         </div>
       </Link>
       <div className="board-container">

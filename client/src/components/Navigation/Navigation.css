@@ -51,7 +51,21 @@ a {
   padding-bottom: 2px;
   color: white;
   position: absolute;
-  top: 11%;
+  top: 105px;
+  left: 40px;
+  border-radius: 50%;
+}
+
+#userplus-length {
+  width: 18px;
+  height: 18px;
+  background: rgba(213, 0, 0, 0.864);
+  font-size: 14px;
+  text-align: center;
+  padding-bottom: 2px;
+  color: white;
+  position: absolute;
+  bottom: 160px;
   left: 40px;
   border-radius: 50%;
 }
