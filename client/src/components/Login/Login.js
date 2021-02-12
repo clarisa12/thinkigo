@@ -5,6 +5,7 @@ import loginIllu from "./undraw_right_places_h9n3.svg";
 import AuthService from "../../AuthService";
 import { useHistory, Link } from "react-router-dom";
 import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
+import logo from "../img/logo.png";
 
 export default function Login() {
   const history = useHistory();
@@ -38,7 +39,8 @@ export default function Login() {
         <div className="login-container-left">
           <div className="login-header">
             <h2 id="login-header-h2">Welcome to</h2>
-            <h1 id="login-header-h1">Thinkigo</h1>
+            {/* <h1 id="login-header-h1">Thinkigo</h1> */}
+            <img src={logo} alt="thinkigo-logo" width="250px" />
           </div>
           <div className="form-container">
             <form id="login-form" onSubmit={onSubmit}>
