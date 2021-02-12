@@ -22,42 +22,37 @@ app.use("/board", boardRouter);
 const server = createServer(app);
 /* creating a new socket.io server instance */
 const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-    },
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
 });
 
 // logs the db error
 dbConnection.on(
-    "error",
-    console.error.bind(console, "MongoDB connection error:")
+  "error",
+  console.error.bind(console, "MongoDB connection error:")
 );
 
 /**
  *
  * @param {Socket} socket
  */
-const socketListener = (socket) => {
-    //when it receives the event "send-coords", the function executes the content (socket.broadcast.emit)
-    socket.on("start-drawing", (coords) => {
-        socket.broadcast.emit("start-drawing", coords);
-    });
 
-    socket.on("send-coords", (coords) => {
-        socket.broadcast.emit("receive-coords", coords);
-    });
+let drawingData = [];
 
-    socket.on("stop-drawing", () => {
-        socket.broadcast.emit("stop-drawing");
+io.on("connection", (socket) => {
+  // Create room
+  socket.on("create", (room) => {
+    socket.join(room);
+    console.log(`user with id ${socket.id} joined room ${room}`);
+    // Emit drawing received from client
+    socket.on("draw", (data) => {
+      drawingData.push(data);
+      socket.in(room).broadcast.emit("draw", data);
     });
-
-    socket.on("disconnect", () => {
-        console.log("disconnected");
-    });
-};
-
-io.on("connection", socketListener);
+  });
+});
 
 const { PORT } = process.env;
 server.listen(PORT, () => console.log(`Server on port ${PORT}`));

@@ -17,17 +17,22 @@
   align-items: center;
   display: flex;
   justify-content: space-around;
-  height: 5%;
-  width: 450px;
-  margin: 0 auto;
-  margin-top: 5px;
+  position: absolute;
+  width: 500px;
+  height: 50px;
+  right: 0;
+  left: 0;
+  margin: auto;
+  margin-top: 10px;
+  z-index: 1;
 }
 
 #clear-btn {
   cursor: pointer;
-  padding: 5px;
-  width: 130px;
-  background-color: #c63131;
+  border-radius: 5px;
+  width: 100px;
+  height: 30px;
+  background-color: rgba(233, 207, 122, 1);
   color: #f8f8f8;
   outline: none;
   border: none;
@@ -38,7 +43,7 @@
 }
 
 #clear-btn:active {
-  background-color: #942424;
+  background-color: rgba(201, 153, 6, 1);
 }
 
 .undo-redo {
@@ -51,9 +56,49 @@
   padding: 5px;
   border: none;
   background-color: #dcdcdc9e;
+  border-radius: 5px;
 }
 
 #board-name:focus {
   outline: none;
   border: none;
+}
+
+#share-btn {
+  font-size: 30px;
+  cursor: pointer;
+  color: rgba(233, 207, 122, 1);
+}
+
+#share-btn:active {
+  color: rgba(201, 153, 6, 1);
+}
+
+.copy-popup {
+  background: whitesmoke;
+  padding: 20px;
+  position: absolute;
+  top: 40px;
+  left: 80%;
+  opacity: 0;
+  transition: 500ms ease;
+}
+
+.copy-popup.active {
+  opacity: 1;
+  transition: 500ms ease;
+}
+
+#copy-popup-btn {
+  padding: 5px;
+  margin-top: 10px;
+  color: white;
+  background: rgba(233, 207, 122, 1);
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+#copy-popup-btn:active {
+  background: rgba(201, 153, 6, 1);
 }

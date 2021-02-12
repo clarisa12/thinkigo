@@ -6,8 +6,8 @@
   width: 66px;
   background: linear-gradient(
     180deg,
-    rgba(198, 49, 49, 1) 1%,
-    rgba(119, 24, 24, 1) 100%
+    rgba(233, 207, 122, 1) 0%,
+    rgba(201, 153, 6, 1) 100%
   );
   box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
 }
@@ -41,4 +41,17 @@ a {
 #nav-container-second-row {
   flex-shrink: 0;
   margin-bottom: 50%;
+}
+
+#bell-length {
+  width: 18px;
+  height: 18px;
+  background: rgba(213, 0, 0, 0.864);
+  text-align: center;
+  padding-bottom: 2px;
+  color: white;
+  position: absolute;
+  top: 11%;
+  left: 40px;
+  border-radius: 50%;
 }
