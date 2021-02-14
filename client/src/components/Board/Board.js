@@ -31,9 +31,9 @@ function Board(props) {
 
     // Refs
     let rectangle = useRef();
-    let socket = useRef();
     const canvas = useRef();
     const brush = useRef();
+    let socket;
 
     useEffect(() => {
         // Create new canvas fabric
@@ -41,20 +41,21 @@ function Board(props) {
             isDrawingMode: true,
             selection: true,
         });
+
         // Separate board id from url
         let id = window.location.href.substring(
             window.location.href.lastIndexOf("/") + 1
         );
 
         // Connect to socket server
-        socket.current = io.connect(process.env.REACT_APP_API_HOST);
-        socket.current.emit("create", id);
-        socket.current.on("connect", () => {
-            socket.current.emit("event");
+        socket = io.connect(process.env.REACT_APP_API_HOST);
+
+        socket.on("connect", () => {
+            socket.emit("join", id);
         });
 
         // Receive drawing event
-        socket.current.on("draw", (obj) => {
+        socket.on("draw", (obj) => {
             let ratio = width / obj.w;
             obj.data.objects.forEach(function (object) {
                 object.left *= ratio;
@@ -230,7 +231,8 @@ function Board(props) {
                 h: height,
                 data: json,
             };
-            socket.current.emit("draw", data);
+            console.log(json);
+            socket.emit("draw", data);
         }
     };
 
