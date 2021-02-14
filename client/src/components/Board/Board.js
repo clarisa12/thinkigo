@@ -47,7 +47,7 @@ function Board(props) {
     );
 
     // Connect to socket server
-    socket.current = io.connect("http://localhost:8080");
+    socket.current = io.connect(process.env.REACT_APP_API_HOST);
     socket.current.emit("create", id);
     socket.current.on("connect", () => {
       socket.current.emit("event");
@@ -84,7 +84,10 @@ function Board(props) {
     canvas.current.on("object:selected", function (o) {
       var activeObj = o.target;
       if (activeObj.get("type") === "group") {
-        activeObj.set({ borderColor: "#fbb802", cornerColor: "#fbb802" });
+        activeObj.set({
+          borderColor: "#fbb802",
+          cornerColor: "#fbb802",
+        });
       }
     });
 
@@ -331,11 +334,11 @@ function Board(props) {
           defaultValue="My board"
           onChange={(e) => setBoardName(e.target.value)}
         />
-        <button onClick={() => saveImg()} id="clear-btn" title="Save board">
-          Save Board
-        </button>
         <button onClick={clear} id="clear-btn" title="Clear board">
           Clear board
+        </button>
+        <button onClick={() => saveImg()} id="clear-btn" title="Save board">
+          Save Board
         </button>
         <FaShareAltSquare
           id="share-btn"
