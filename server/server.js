@@ -22,16 +22,16 @@ app.use("/board", boardRouter);
 const server = createServer(app);
 /* creating a new socket.io server instance */
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+    },
 });
 
 // logs the db error
 dbConnection.on(
-  "error",
-  console.error.bind(console, "MongoDB connection error:")
+    "error",
+    console.error.bind(console, "MongoDB connection error:")
 );
 
 /**
@@ -42,16 +42,17 @@ dbConnection.on(
 let drawingData = [];
 
 io.on("connection", (socket) => {
-  // Create room
-  socket.on("create", (room) => {
-    socket.join(room);
-    console.log(`user with id ${socket.id} joined room ${room}`);
-    // Emit drawing received from client
-    socket.on("draw", (data) => {
-      drawingData.push(data);
-      socket.in(room).broadcast.emit("draw", data);
+    // Create room
+    socket.on("create", (room) => {
+        socket.join(room);
+        console.log(`user with id ${socket.id} joined room ${room}`);
+        // Emit drawing received from client
+        socket.on("draw", (data) => {
+            drawingData.push(data);
+            console.log(data);
+            socket.in(room).broadcast.emit("draw", data);
+        });
     });
-  });
 });
 
 const { PORT } = process.env;
