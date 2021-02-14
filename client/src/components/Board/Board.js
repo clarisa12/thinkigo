@@ -331,11 +331,11 @@ function Board(props) {
           defaultValue="My board"
           onChange={(e) => setBoardName(e.target.value)}
         />
-        <button onClick={clear} id="clear-btn" title="Clear board">
-          Clear board
-        </button>
         <button onClick={() => saveImg()} id="clear-btn" title="Save board">
           Save Board
+        </button>
+        <button onClick={clear} id="clear-btn" title="Clear board">
+          Clear board
         </button>
         <FaShareAltSquare
           id="share-btn"
