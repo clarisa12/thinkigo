@@ -7,50 +7,50 @@ import { generatePath } from "react-router";
 export const DataContext = createContext();
 
 export const DataProvider = (props) => {
-  const [image, setImage] = useState();
-  const [boardName, setBoardName] = useState("");
-  const [currentId, setCurrentId] = useState();
+    const [image, setImage] = useState();
+    const [boardName, setBoardName] = useState("");
+    const [currentId, setCurrentId] = useState();
 
-  let boardId = null;
+    let boardId = null;
 
-  function saveBoardInDb() {
-    fetchWrapper("/board/new", "POST", {
-      board_id: currentId,
-      email: AuthService.getUserData().email,
-      data: image,
-      board_name: boardName,
-    });
-  }
+    function saveBoardInDb() {
+        fetchWrapper("/board/new", "POST", {
+            boardId,
+            email: AuthService.getUserData().email,
+            data: image,
+            boardName: boardName,
+        });
+    }
 
-  function createNewBoardId() {
-    boardId = uid(25);
+    function createNewBoardId() {
+        boardId = uid(25);
 
-    return generatePath("/board/:id", {
-      id: boardId,
-    });
-  }
+        return generatePath("/board/:id", {
+            id: boardId,
+        });
+    }
 
-  const getBoards = () => {
-    return fetchWrapper("/", "GET", {
-      email: AuthService.getUserData().email,
-    });
-  };
+    const getBoards = () => {
+        return fetchWrapper("/", "GET", {
+            email: AuthService.getUserData().email,
+        });
+    };
 
-  return (
-    <DataContext.Provider
-      value={{
-        image,
-        setImage,
-        saveBoardInDb,
-        createNewBoardId,
-        getBoards,
-        setBoardName,
-        boardName,
-        currentId,
-        setCurrentId,
-      }}
-    >
-      {props.children}
-    </DataContext.Provider>
-  );
+    return (
+        <DataContext.Provider
+            value={{
+                image,
+                setImage,
+                saveBoardInDb,
+                createNewBoardId,
+                getBoards,
+                setBoardName,
+                boardName,
+                currentId,
+                setCurrentId,
+            }}
+        >
+            {props.children}
+        </DataContext.Provider>
+    );
 };
