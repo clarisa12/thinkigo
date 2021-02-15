@@ -26,9 +26,9 @@ function Dashboard() {
         fetchBoards().then((res) => setBoards(res.boards));
     }, []);
 
-    function saveBoardInDb() {
+    function saveBoardInDb(type) {
         fetchWrapper("/board/new", "POST", {
-            boardId,
+            boardId: boardId[type],
             email: AuthService.getUserData().email,
         });
     }
