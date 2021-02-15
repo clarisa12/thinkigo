@@ -2,7 +2,12 @@ import { createClient } from "redis";
 
 class Redis {
     constructor() {
-        this.client = createClient();
+        if (process.env.REDIS_PROVIDER) {
+            this.client = createClient(process.env.REDIS_PROVIDER);
+        } else {
+            this.client = createClient();
+        }
+        this.client = createClient(process.env.REDIS_PROVIDER);
         // https://stackoverflow.com/questions/53104472/node-redis-updating-used-memory-info
         setInterval(() => {
             this.client.info((req, res) => {
