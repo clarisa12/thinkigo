@@ -3,6 +3,16 @@ import { createClient } from "redis";
 class Redis {
     constructor() {
         this.client = createClient();
+        // https://stackoverflow.com/questions/53104472/node-redis-updating-used-memory-info
+        setInterval(() => {
+            this.client.info((req, res) => {
+                res.split("\n").map((line) => {
+                    if (line.match(/used_memory_human/)) {
+                        console.log("Used memory: " + line.split(":")[1]);
+                    }
+                });
+            });
+        }, 10000);
 
         this.client.on("error", (err) => {
             console.error(err);
