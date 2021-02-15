@@ -9,7 +9,17 @@ function Container() {
     <div className="container">
       <Link to="/">
         <div className="logo-overlay">
-          <img src={logo} width="240px" draggable="false" alt="thinkigo-logo" />
+          <img
+            src={logo}
+            width="240px"
+            draggable="false"
+            alt="thinkigo-logo"
+            unselectable="on"
+            id="board-logo"
+            onClick={() => {
+              document.webkitCancelFullScreen();
+            }}
+          />
         </div>
       </Link>
       <div className="board-container">

@@ -8,29 +8,34 @@ import {
   FaPencilAlt,
   FaRegSquare,
   FaShareAltSquare,
-  FaArrowUp,
+  FaSlash,
   FaICursor,
   FaMousePointer,
-  FaCircle,
+  FaRegCircle,
+  FaVideo,
+  FaSave,
 } from "react-icons/fa";
+import swal from "sweetalert";
 
 function Board(props) {
   const { setImage, setBoardName } = useContext(DataContext);
   const [brushSize, setBrushSize] = useState(1);
   const [brushColor, setBrushColor] = useState("black");
   const [showShare, setShowShare] = useState(false);
+  const [presentationMode, setPresentationMode] = useState(false);
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
 
   // Variables
   let circle;
+  let line;
+  let rectangle;
   let isDown = false;
   let origX;
   let origY;
   let tool;
 
   // Refs
-  let rectangle = useRef();
   const canvas = useRef();
   const brush = useRef();
   let socket = useRef();
@@ -40,6 +45,8 @@ function Board(props) {
     canvas.current = new fabric.Canvas("canvas", {
       isDrawingMode: true,
       selection: true,
+      backgroundColor: null,
+      preserveObjectStacking: true,
     });
 
     // Separate board id from url
@@ -104,13 +111,18 @@ function Board(props) {
         emitEvent();
       }
     });
+    canvas.current.on("object:removed", () => {
+      if (!canvas.current._activeObject) {
+        emitEvent();
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const enableDragging = () => {
     canvas.current.on("mouse:down", function (opt) {
       var evt = opt.e;
-      if (evt.altKey === true) {
+      if (evt.shiftKey === true) {
         this.isDragging = true;
         this.selection = false;
         this.lastPosX = evt.clientX;
@@ -127,6 +139,7 @@ function Board(props) {
         this.requestRenderAll();
         this.lastPosX = e.clientX;
         this.lastPosY = e.clientY;
+      } else {
       }
     });
     canvas.current.on("mouse:up", function (opt) {
@@ -143,9 +156,9 @@ function Board(props) {
       canvas.current.isDrawingMode = false;
       origX = pointer.x;
       origY = pointer.y;
+      isDown = true;
       if (tool === "rect") {
-        isDown = true;
-        rectangle.current = new fabric.Rect({
+        rectangle = new fabric.Rect({
           left: origX,
           top: origY,
           fill: "transparent",
@@ -153,9 +166,8 @@ function Board(props) {
           strokeWidth: brushSize,
           selectable: true,
         });
-        canvas.current.add(rectangle.current);
+        canvas.current.add(rectangle);
       } else if (tool === "circle") {
-        isDown = true;
         // eslint-disable-next-line react-hooks/exhaustive-deps
         circle = new fabric.Circle({
           left: origX,
@@ -169,6 +181,16 @@ function Board(props) {
           originY: "center",
         });
         canvas.current.add(circle);
+      } else if (tool === "line") {
+        var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+        line = new fabric.Line(points, {
+          strokeWidth: brushSize,
+          // fill: "red",
+          stroke: brushColor,
+          originX: "center",
+          originY: "center",
+        });
+        canvas.current.add(line);
       } else {
         return;
       }
@@ -180,25 +202,28 @@ function Board(props) {
     var pointer = canvas.current.getPointer(o.e);
     if (tool === "rect") {
       if (origX > pointer.x) {
-        rectangle.current.set({
+        rectangle.set({
           left: Math.abs(pointer.x),
         });
       }
       if (origY > pointer.y) {
-        rectangle.current.set({
+        rectangle.set({
           top: Math.abs(pointer.y),
         });
       }
 
-      rectangle.current.set({
+      rectangle.set({
         width: Math.abs(origX - pointer.x),
       });
-      rectangle.current.set({
+      rectangle.set({
         height: Math.abs(origY - pointer.y),
       });
       canvas.current.renderAll();
     } else if (tool === "circle") {
       circle.set({ radius: Math.abs(origX - pointer.x) });
+      canvas.current.renderAll();
+    } else if (tool === "line") {
+      line.set({ x2: pointer.x, y2: pointer.y });
       canvas.current.renderAll();
     } else {
       return;
@@ -208,12 +233,16 @@ function Board(props) {
   const onMouseUp = (o) => {
     isDown = false;
     if (tool === "rect") {
-      if (rectangle.current) {
-        rectangle.current.setCoords();
+      if (rectangle) {
+        rectangle.setCoords();
       }
     } else if (tool === "circle") {
       if (circle) {
         circle.setCoords();
+      }
+    } else if (tool === "line") {
+      if (line) {
+        line.setCoords();
       }
     } else {
       return;
@@ -247,9 +276,17 @@ function Board(props) {
   // Clear board
 
   const clear = () => {
-    if (window.confirm("Are you sure you want to clear your work?")) {
-      canvas.current.clear();
-    }
+    swal({
+      title: "Are you sure you want to clear your board?",
+      text: "there is no going back!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((result) => {
+      if (result) {
+        canvas.current.clear();
+      }
+    });
   };
 
   // Stroke change
@@ -328,9 +365,27 @@ function Board(props) {
     }, 7000);
   }
 
+  if (document.getElementById("color-picker-container")) {
+    if (presentationMode) {
+      document.getElementById("color-picker-container").style.display = "none";
+      document.getElementById("btns-container").style.display = "none";
+      tool = "select";
+      disableDrawingMode();
+      enableDragging();
+      canvas.current.defaultCursor = "grab";
+      document.body.requestFullscreen();
+      document.body.webkitRequestFullScreen();
+    } else {
+      canvas.current.defaultCursor = "default";
+      document.getElementById("color-picker-container").style.display = "block";
+      document.getElementById("btns-container").style.display = "flex";
+      document.webkitCancelFullScreen();
+    }
+  }
+
   return (
     <div className="sketch" id="sketch">
-      <div className="btns-container">
+      <div id="btns-container">
         <input
           type="text"
           id="board-name"
@@ -340,9 +395,11 @@ function Board(props) {
         <button onClick={clear} id="clear-btn" title="Clear board">
           Clear board
         </button>
-        <button onClick={() => saveImg()} id="clear-btn" title="Save board">
-          Save Board
-        </button>
+        <FaSave
+          onClick={() => saveImg()}
+          id="share-btn"
+          title="Save board"
+        ></FaSave>
         <FaShareAltSquare
           id="share-btn"
           title="Share board"
@@ -369,7 +426,7 @@ function Board(props) {
         </div>
       </div>
       <canvas id="canvas" ref={canvas} width={width} height={height} />
-      <div className="color-picker-container">
+      <div id="color-picker-container">
         <input
           type="color"
           id="color-input"
@@ -407,6 +464,16 @@ function Board(props) {
           title="Brush size"
         />
         <p>{brushSize}</p>
+        <FaICursor
+          id="item"
+          onClick={() => {
+            canvas.current.add(text);
+            disableDrawingMode();
+            enableDragging();
+            draw();
+          }}
+          title="Text"
+        />
         <FaRegSquare
           id="item"
           onClick={() => {
@@ -417,7 +484,7 @@ function Board(props) {
           }}
           title="Rectangle"
         />
-        <FaCircle
+        <FaRegCircle
           id="item"
           onClick={() => {
             disableShape();
@@ -426,17 +493,25 @@ function Board(props) {
           }}
           title="Circle"
         />
-        <FaArrowUp id="item" />
-        <FaICursor
+        <FaSlash
           id="item"
           onClick={() => {
-            canvas.current.add(text);
-            disableDrawingMode();
-            enableDragging();
+            disableShape();
+            tool = "line";
             draw();
           }}
+          title="Line"
         />
       </div>
+      <FaVideo
+        id="presentation-btn"
+        onClick={() => {
+          setPresentationMode(!presentationMode);
+        }}
+        title="Toggle presentation mode"
+      >
+        Presentation mode
+      </FaVideo>
     </div>
   );
 }

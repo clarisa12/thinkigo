@@ -4,9 +4,6 @@ body {
   background-color: #f8f8f8;
 }
 
-.dashboard-container {
-}
-
 #search-container {
   width: 350px;
   top: 50px;
@@ -32,9 +29,6 @@ body {
   width: 200px;
   margin-top: 150px;
   margin-left: 10%;
-}
-
-#boards-header {
 }
 
 .boards-container {

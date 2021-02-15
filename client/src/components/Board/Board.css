@@ -13,7 +13,7 @@
   background-color: rgba(255, 255, 255, 0.8);
 }
 
-.btns-container {
+#btns-container {
   align-items: center;
   display: flex;
   justify-content: space-around;
@@ -25,6 +25,7 @@
   margin: auto;
   margin-top: 10px;
   z-index: 1;
+  /* background: rgba(255, 255, 255, 0.8); */
 }
 
 #clear-btn {
@@ -117,4 +118,27 @@
   border: none;
   outline: none;
   padding: 10px;
+}
+
+#presentation-btn {
+  position: absolute;
+  overflow: unset;
+  font-size: 30px;
+  bottom: 3%;
+  right: 3%;
+  color: white;
+  background: rgba(233, 207, 122, 0.5);
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+#presentation-btn:hover {
+  /* transform: scale(0.95); */
+  background: rgba(233, 207, 122, 1);
+}
+
+#presentation-btn:active {
+  background: rgba(201, 153, 6, 1);
 }

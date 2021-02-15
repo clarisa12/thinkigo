@@ -69,3 +69,19 @@ a {
   left: 40px;
   border-radius: 50%;
 }
+
+.notifications-popup {
+  position: absolute;
+  left: 70px;
+  top: 100px;
+  width: 300px;
+  height: 200px;
+  background: rgba(255, 255, 255, 1);
+  opacity: 0;
+  transition: 0.3s ease;
+  box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
+}
+
+.notifications-popup.active {
+  opacity: 1;
+}
