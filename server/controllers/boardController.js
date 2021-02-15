@@ -26,15 +26,39 @@ export const createNew = async (req, res) => {
     }
 };
 
+export const getUserBoards = async (req, res) => {
+    const { email } = req.query;
+
+    try {
+        const user = await UserModel.findOne({ email });
+        const boards = await BoardModel.find({
+            author: user._id,
+        });
+
+        return res.status(200).json({
+            success: true,
+            boards,
+        });
+    } catch (error) {
+        return res.status(400).json({
+            error,
+            message: "Not created",
+        });
+    }
+};
+
 /**
  *
  * @param {string} boardId
  * @param {Object} data
  */
 export const flushBoardData2Mongo = async (boardId, data) => {
-    const objStr = JSON.stringify(data);
     return await BoardModel.updateOne(
         { boardId },
-        { $set: { data: objStr, isDrawing: false } }
+        { $set: { data, isDrawing: false } }
     );
+};
+
+export const getBoardData = async (boardId) => {
+    return await BoardModel.findOne({ boardId });
 };
