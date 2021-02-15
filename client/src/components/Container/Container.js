@@ -9,7 +9,7 @@ function Container() {
     <div className="container">
       <Link to="/">
         <div className="logo-overlay">
-          <img src={logo} width="240px" />
+          <img src={logo} width="240px" draggable="false" alt="thinkigo-logo" />
         </div>
       </Link>
       <div className="board-container">

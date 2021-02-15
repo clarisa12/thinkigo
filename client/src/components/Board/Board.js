@@ -19,8 +19,8 @@ function Board(props) {
   const [brushSize, setBrushSize] = useState(1);
   const [brushColor, setBrushColor] = useState("black");
   const [showShare, setShowShare] = useState(false);
-  const [width, setWidth] = useState(window.innerWidth);
-  const [height, setHeight] = useState(window.innerHeight);
+  const [width] = useState(window.innerWidth);
+  const [height] = useState(window.innerHeight);
 
   // Variables
   let circle;
@@ -33,7 +33,7 @@ function Board(props) {
   let rectangle = useRef();
   const canvas = useRef();
   const brush = useRef();
-  let socket;
+  let socket = useRef();
 
   useEffect(() => {
     // Create new canvas fabric
@@ -48,23 +48,10 @@ function Board(props) {
     );
 
     // Connect to socket server
-    socket = io.connect(process.env.REACT_APP_API_HOST);
+    socket.current = io.connect(process.env.REACT_APP_API_HOST);
 
-    socket.on("connect", () => {
-      socket.emit("join", id);
-    });
-
-    // Receive drawing event
-    socket.on("draw", (obj) => {
-      let ratio = width / obj.w;
-      obj.data.objects.forEach(function (object) {
-        object.left *= ratio;
-        object.scaleX *= ratio;
-        object.top *= ratio;
-        object.scaleY *= ratio;
-      });
-      canvas.current.loadFromJSON(obj.data);
-      canvas.current.renderAll();
+    socket.current.on("connect", () => {
+      socket.current.emit("join", id);
     });
 
     // Receive drawing event
@@ -76,8 +63,10 @@ function Board(props) {
         object.top *= ratio;
         object.scaleY *= ratio;
       });
-      canvas.current.loadFromJSON(obj.data);
-      canvas.current.renderAll();
+      if (canvas.current) {
+        canvas.current.loadFromJSON(obj.data);
+        canvas.current.renderAll();
+      }
     });
 
     // Brush variable
@@ -115,6 +104,7 @@ function Board(props) {
         emitEvent();
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const enableDragging = () => {
@@ -257,16 +247,15 @@ function Board(props) {
   // Clear board
 
   const clear = () => {
-    canvas.current.clear();
+    if (window.confirm("Are you sure you want to clear your work?")) {
+      canvas.current.clear();
+    }
   };
 
   // Stroke change
   const handleColorChange = (e) => {
     brush.current.color = e.target.value;
     setBrushColor(e.target.value);
-    if (rectangle.current) {
-      rectangle.current.stroke = e.target.value;
-    }
   };
 
   // Color change
@@ -360,7 +349,12 @@ function Board(props) {
           onClick={() => setShowShare(!showShare)}
         />
         <div className={showShare ? "copy-popup active" : "copy-popup"}>
-          <input type="text" value={window.location.href} id="copy-input" />
+          <input
+            type="text"
+            value={window.location.href}
+            id="copy-input"
+            readOnly
+          />
           <button
             id="copy-popup-btn"
             onClick={() => {
