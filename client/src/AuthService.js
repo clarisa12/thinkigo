@@ -24,7 +24,7 @@ class AuthService {
         localStorage.setItem(USER_DATA, JSON.stringify(data));
     }
 
-    _rmUserData(data) {
+    _rmUserData() {
         localStorage.removeItem(USER_DATA);
     }
 
