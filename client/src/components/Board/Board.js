@@ -18,6 +18,8 @@ import {
 } from "react-icons/fa";
 import swal from "sweetalert";
 import background from "../img/background01.jpg";
+import AuthService from "../../AuthService";
+import { Redirect } from "react-router-dom/cjs/react-router-dom.min";
 
 function Board(props) {
   const { setImage, setBoardName } = useContext(DataContext);
@@ -43,7 +45,7 @@ function Board(props) {
   const canvas = useRef();
   const brush = useRef();
   let socket = useRef();
-  const usersRef = useRef(socketUsers);
+  const clientData = useRef();
 
   useEffect(() => {
     // Create new canvas fabric
@@ -61,17 +63,20 @@ function Board(props) {
 
     let clientName = JSON.parse(localStorage.getItem("user_data"));
 
-    let clientData = {
-      roomId: id,
-      name: clientName.fname,
-    };
+    if (clientName) {
+      clientData.current = {
+        roomId: id,
+        name: clientName.fname,
+      };
+    }
 
     // Connect to socket server
     socket.current = io.connect(process.env.REACT_APP_API_HOST);
-
-    socket.current.on("connect", () => {
-      socket.current.emit("join", clientData);
-    });
+    if (clientData.current) {
+      socket.current.on("connect", () => {
+        socket.current.emit("join", clientData.current);
+      });
+    }
 
     // Get users in session
     socket.current.on("users", (data) => {
@@ -404,7 +409,7 @@ function Board(props) {
       disableDrawingMode();
       enableDragging();
       canvas.current.defaultCursor = "grab";
-      document.body.requestFullscreen();
+      // document.body.requestFullscreen();
       document.body.webkitRequestFullScreen();
     } else {
       canvas.current.defaultCursor = "default";
@@ -432,6 +437,10 @@ function Board(props) {
       return null;
     }
   };
+
+  if (!AuthService.auth.isSignedIn) {
+    return <Redirect path="/" />;
+  }
 
   return (
     <div className="sketch" id="sketch">

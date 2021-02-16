@@ -52,7 +52,8 @@ export default function io(server) {
         name: room.name,
         id: socket.id,
       };
-      if (users.includes(userData.id) === false) users.push(userData);
+      if (users.includes(userData.id || userData.name) === false)
+        users.push(userData);
 
       // Whenever a new client connects check if there is data on redis
       if (connectedUsers.get(room.roomId) === 1) {
@@ -76,12 +77,12 @@ export default function io(server) {
       }
 
       setInterval(() => {
-        socket.in(room.roomId).emit("users", users);
+        socket.in(room.roomId).broadcast.emit("users", users);
       }, 5000);
 
-      setTimeout(() => {
-        clearInterval();
-      }, 7000);
+      // setTimeout(() => {
+      //   clearInterval(interval);
+      // }, 7000);
       // Emit drawing received from client
       socket.on("draw", drawHandler);
 
@@ -99,7 +100,7 @@ export default function io(server) {
       let index = getUserById(socket.id);
       if (index > -1) users.splice(index, 1);
       console.log(room);
-      socket.in(room).emit("users", users);
+      socket.in(room).broadcast.emit("users", users);
       console.log(users);
 
       if (connectedUsers.get(room) === 0) {
