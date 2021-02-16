@@ -7,14 +7,18 @@ import AuthService from "./AuthService";
  * from: https://blog.netcetera.com/how-to-create-guarded-routes-for-your-react-app-d2fe7c7b6122
  */
 const ProtectedRoute = ({ component: Component, ...rest }) => {
+    const isSignedIn = AuthService.auth.isSignedIn === true;
+
     return (
         <Route
             {...rest}
             render={(props) =>
-                AuthService.auth.isSignedIn === true ? (
+                isSignedIn ? (
                     <Component {...props} />
                 ) : (
-                    <Redirect to="/login" />
+                    <Redirect
+                        to={`/login?redirect=${window.location.pathname}`}
+                    />
                 )
             }
         />
