@@ -2,95 +2,96 @@
 
 html,
 body {
-  font-family: "Raleway", sans-serif;
+    font-family: "Raleway", sans-serif;
 }
 
 .regis-container-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
-  width: 1300px;
-  height: 770px;
-  margin: 0 auto;
-  margin-top: 5%;
-  -webkit-box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
-  box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    width: 1300px;
+    height: 770px;
+    margin: 0 auto;
+    margin-top: 5%;
+    -webkit-box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
+    box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
 }
 
 .regis-container-left {
-  background-color: #f8f8f8;
-  padding: 30px;
+    background-color: #f8f8f8;
+    padding: 30px;
 }
 
 #regis-header-h2 {
-  color: #999999;
+    color: #999999;
 }
 
 #regis-header-h2-2 {
-  color: #f8f8f8;
-  margin-top: 20%;
+    color: #f8f8f8;
+    margin-top: 20%;
 }
 
 .regis-container-right {
-  background: linear-gradient(
-    180deg,
-    rgba(65, 150, 161, 1) 0%,
-    rgba(31, 75, 80, 1) 100%
-  );
+    background: linear-gradient(
+        180deg,
+        rgba(65, 150, 161, 1) 0%,
+        rgba(31, 75, 80, 1) 100%
+    );
 }
 
 .regis-header {
-  margin-top: 50%;
+    margin-top: 50%;
 }
 
 #fname-input,
 #lname-input,
 #email-input,
 #password-input {
-  padding: 10px;
-  width: 300px;
-  margin: 0 auto;
-  margin-bottom: 15px;
-  margin-top: 30px;
-  display: block;
-  outline: none;
-  border: none;
-  background-color: #f8f8f8;
-  color: #1a1a1a;
-  font-family: "Raleway", "sans-serif";
+    padding: 10px;
+    width: 300px;
+    margin: 0 auto;
+    margin-bottom: 15px;
+    margin-top: 30px;
+    display: block;
+    outline: none;
+    border: none;
+    background-color: #f8f8f8;
+    color: #1a1a1a;
+    font-family: "Raleway", "sans-serif";
 }
 
 #password-input {
-  color: #1a1a1a;
+    color: #1a1a1a;
+    margin-top: 30px !important;
 }
 
 .form-container {
-  margin-top: 20%;
+    margin-top: 20%;
 }
 
 #regis-btn {
-  padding: 10px;
-  margin-top: 40px;
-  outline: none;
-  border: none;
-  background-color: #f8f8f8;
-  opacity: 0.8;
-  color: rgba(65, 150, 161, 1);
-  cursor: pointer;
-  font-family: "Raleway", "sans-serif";
-  width: 100px;
-  transition: 0.3s ease;
+    padding: 10px;
+    margin-top: 40px;
+    outline: none;
+    border: none;
+    background-color: #f8f8f8;
+    opacity: 0.8;
+    color: rgba(65, 150, 161, 1);
+    cursor: pointer;
+    font-family: "Raleway", "sans-serif";
+    width: 100px;
+    transition: 0.3s ease;
 }
 
 #regis-btn:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
 #login-btn {
-  color: #f8f8f8;
-  cursor: pointer;
-  margin-top: 2em;
-  text-decoration: none;
+    color: #f8f8f8;
+    cursor: pointer;
+    margin-top: 2em;
+    text-decoration: none;
 }
