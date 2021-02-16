@@ -60,16 +60,16 @@ export default function io(server) {
             // Whenever a new client connects check if there is data on redis
             if (connectedUsers.get(room.roomId) === 1) {
                 // load from mongo database
-                getBoardData(room).then((board) => {
+                getBoardData(room.roomId).then((board) => {
                     logInfo(socket, room, "mongo");
                     // load data in memory on redis
                     if (board.data) {
-                        redis.store(room, board.data);
+                        redis.store(room.roomId, board.data);
                         socket.emit("draw", JSON.parse(board.data));
                     }
                 });
             } else {
-                logInfo(socket, room, "redis");
+                logInfo(socket, room.roomId, "redis");
                 // try to get from redis
                 redis.retrieve(room.roomId, (err, data) => {
                     if (data) {
@@ -91,16 +91,19 @@ export default function io(server) {
 
         function disconnectHandler() {
             const { room } = socket;
-            connectedUsers.set(room, connectedUsers.get(room) - 1);
+            connectedUsers.set(
+                room.roomId,
+                connectedUsers.get(room.roomId) - 1
+            );
             let index = getUserById(socket.id);
             if (index > -1) users.splice(index, 1);
             socket.emit("users", users);
 
-            if (connectedUsers.get(room) === 0) {
-                redis.retrieve(socket.room, (err, data) => {
+            if (connectedUsers.get(room.roomId) === 0) {
+                redis.retrieve(socket.room.roomId, (err, data) => {
                     // cleanup memory associated with room
-                    redis.delete(socket.room);
-                    flushBoardData2Mongo(socket.room, data);
+                    redis.delete(socket.room.roomId);
+                    flushBoardData2Mongo(socket.room.roomId, data);
                 });
             }
         }
