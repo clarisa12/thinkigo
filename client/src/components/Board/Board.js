@@ -7,15 +7,17 @@ import "../Container/Container.css";
 import {
   FaPencilAlt,
   FaRegSquare,
-  FaShareAltSquare,
+  FaRegShareSquare,
   FaSlash,
   FaICursor,
   FaMousePointer,
   FaRegCircle,
-  FaVideo,
-  FaSave,
+  FaChalkboardTeacher,
+  FaRegSave,
+  FaUsers,
 } from "react-icons/fa";
 import swal from "sweetalert";
+import background from "../img/background01.jpg";
 
 function Board(props) {
   const { setImage, setBoardName } = useContext(DataContext);
@@ -25,6 +27,8 @@ function Board(props) {
   const [presentationMode, setPresentationMode] = useState(false);
   const [width] = useState(window.innerWidth);
   const [height] = useState(window.innerHeight);
+  const [socketUsers, setSocketUsers] = useState([]);
+  const [showUsers, setShowUsers] = useState(false);
 
   // Variables
   let circle;
@@ -39,6 +43,7 @@ function Board(props) {
   const canvas = useRef();
   const brush = useRef();
   let socket = useRef();
+  const usersRef = useRef(socketUsers);
 
   useEffect(() => {
     // Create new canvas fabric
@@ -54,11 +59,23 @@ function Board(props) {
       window.location.href.lastIndexOf("/") + 1
     );
 
+    let clientName = JSON.parse(localStorage.getItem("user_data"));
+
+    let clientData = {
+      roomId: id,
+      name: clientName.fname,
+    };
+
     // Connect to socket server
     socket.current = io.connect(process.env.REACT_APP_API_HOST);
 
     socket.current.on("connect", () => {
-      socket.current.emit("join", id);
+      socket.current.emit("join", clientData);
+    });
+
+    // Get users in session
+    socket.current.on("users", (data) => {
+      setSocketUsers(data);
     });
 
     // Receive drawing event
@@ -118,6 +135,10 @@ function Board(props) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    usersRef.current = socketUsers;
+  });
 
   const enableDragging = () => {
     canvas.current.on("mouse:down", function (opt) {
@@ -369,6 +390,9 @@ function Board(props) {
     if (presentationMode) {
       document.getElementById("color-picker-container").style.display = "none";
       document.getElementById("btns-container").style.display = "none";
+      document.getElementById("users-icon").style.display = "none";
+      document.getElementById("board-container").style.backgroundImage =
+        "unset";
       tool = "select";
       disableDrawingMode();
       enableDragging();
@@ -377,14 +401,41 @@ function Board(props) {
       document.body.webkitRequestFullScreen();
     } else {
       canvas.current.defaultCursor = "default";
+      document.getElementById(
+        "board-container"
+      ).style.backgroundImage = `url(${background})`;
       document.getElementById("color-picker-container").style.display = "block";
       document.getElementById("btns-container").style.display = "flex";
+      document.getElementById("users-icon").style.display = "block";
       document.webkitCancelFullScreen();
     }
   }
 
+  const ListUsers = () => {
+    if (socketUsers) {
+      return (
+        <div>
+          <h3>Users in session:</h3>
+          {socketUsers.map((item) => {
+            return <p key={item.id}>{item.name}</p>;
+          })}
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+
   return (
     <div className="sketch" id="sketch">
+      <div className={showUsers ? "connected-users active" : "connected-users"}>
+        <ListUsers />
+      </div>
+      <FaUsers
+        onClick={() => setShowUsers(!showUsers)}
+        id="users-icon"
+        title="Users in session"
+      />
       <div id="btns-container">
         <input
           type="text"
@@ -393,14 +444,14 @@ function Board(props) {
           onChange={(e) => setBoardName(e.target.value)}
         />
         <button onClick={clear} id="clear-btn" title="Clear board">
-          Clear board
+          Clear
         </button>
-        <FaSave
+        <FaRegSave
           onClick={() => saveImg()}
           id="share-btn"
           title="Save board"
-        ></FaSave>
-        <FaShareAltSquare
+        />
+        <FaRegShareSquare
           id="share-btn"
           title="Share board"
           onClick={() => setShowShare(!showShare)}
@@ -413,7 +464,7 @@ function Board(props) {
             readOnly
           />
           <button
-            id="copy-popup-btn"
+            id="clear-btn"
             onClick={() => {
               let urlCopy = document.getElementById("copy-input");
               urlCopy.select();
@@ -421,7 +472,7 @@ function Board(props) {
               document.execCommand("copy");
             }}
           >
-            Copy to clipboard
+            Copy
           </button>
         </div>
       </div>
@@ -503,7 +554,7 @@ function Board(props) {
           title="Line"
         />
       </div>
-      <FaVideo
+      <FaChalkboardTeacher
         id="presentation-btn"
         onClick={() => {
           setPresentationMode(!presentationMode);
@@ -511,7 +562,7 @@ function Board(props) {
         title="Toggle presentation mode"
       >
         Presentation mode
-      </FaVideo>
+      </FaChalkboardTeacher>
     </div>
   );
 }

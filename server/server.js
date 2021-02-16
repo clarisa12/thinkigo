@@ -23,8 +23,8 @@ socket(server);
 
 // logs the db error
 dbConnection.on(
-    "error",
-    console.error.bind(console, "MongoDB connection error:")
+  "error",
+  console.error.bind(console, "MongoDB connection error:")
 );
 
 const { PORT } = process.env;

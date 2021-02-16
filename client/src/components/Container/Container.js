@@ -22,7 +22,7 @@ function Container() {
           />
         </div>
       </Link>
-      <div className="board-container">
+      <div id="board-container">
         <Board />
       </div>
     </div>
