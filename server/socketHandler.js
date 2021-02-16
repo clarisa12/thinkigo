@@ -78,6 +78,10 @@ export default function io(server) {
       setInterval(() => {
         socket.in(room.roomId).emit("users", users);
       }, 5000);
+
+      setTimeout(() => {
+        clearInterval();
+      }, 7000);
       // Emit drawing received from client
       socket.on("draw", drawHandler);
 
