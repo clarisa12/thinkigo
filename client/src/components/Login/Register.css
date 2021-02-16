@@ -36,8 +36,8 @@ body {
 .regis-container-right {
   background: linear-gradient(
     180deg,
-    rgba(233, 207, 122, 1) 0%,
-    rgba(201, 153, 6, 1) 100%
+    rgba(65, 150, 161, 1) 0%,
+    rgba(31, 75, 80, 1) 100%
   );
 }
 
@@ -77,7 +77,7 @@ body {
   border: none;
   background-color: #f8f8f8;
   opacity: 0.8;
-  color: rgba(201, 153, 6, 1);
+  color: rgba(65, 150, 161, 1);
   cursor: pointer;
   font-family: "Raleway", "sans-serif";
   width: 100px;

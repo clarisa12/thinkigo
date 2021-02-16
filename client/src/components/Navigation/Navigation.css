@@ -6,8 +6,8 @@
   width: 66px;
   background: linear-gradient(
     180deg,
-    rgba(233, 207, 122, 1) 0%,
-    rgba(201, 153, 6, 1) 100%
+    rgba(65, 150, 161, 1) 0%,
+    rgba(31, 75, 80, 1) 100%
   );
   box-shadow: 6px 6px 12px -1px rgba(0, 0, 0, 0.41);
 }

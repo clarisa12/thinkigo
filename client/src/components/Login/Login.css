@@ -56,8 +56,8 @@ body {
   padding: 30px;
   background: linear-gradient(
     180deg,
-    rgba(233, 207, 122, 1) 0%,
-    rgba(201, 153, 6, 1) 100%
+    rgba(65, 150, 161, 1) 0%,
+    rgba(31, 75, 80, 1) 100%
   );
 }
 
@@ -89,7 +89,7 @@ body {
   margin-top: 40px;
   outline: none;
   border: none;
-  background-color: #e9cf7a;
+  background-color: rgba(65, 150, 161, 1);
   opacity: 0.8;
   color: #f8f8f8;
   cursor: pointer;
@@ -103,7 +103,7 @@ body {
 }
 
 #sign-up-btn {
-  color: #c99906;
+  color: rgba(65, 150, 161, 1);
   cursor: pointer;
   margin-top: 2em;
 }

@@ -45,12 +45,12 @@
 
 #clear-btn:hover {
   color: white;
-  background-color: rgba(233, 207, 122, 1);
+  background-color: rgba(65, 150, 161, 0.5);
 }
 
 #clear-btn:active {
   color: white;
-  background-color: rgba(201, 153, 6, 1);
+  background-color: rgba(65, 150, 161, 1);
 }
 
 #board-name {
@@ -71,12 +71,12 @@
 }
 
 #share-btn:hover {
-  color: rgba(247, 210, 91, 0.748);
+  color: rgba(65, 150, 161, 0.5);
   transition: 0.2s ease;
 }
 
 #share-btn:active {
-  color: rgba(201, 153, 6, 1);
+  color: rgba(65, 150, 161, 1);
 }
 
 .copy-popup {
@@ -108,7 +108,7 @@
   bottom: 3%;
   right: 3%;
   color: white;
-  background: rgba(233, 207, 122, 0.5);
+  background: rgba(65, 150, 161, 0.5);
   padding: 10px;
   border-radius: 50%;
   cursor: pointer;
@@ -117,11 +117,11 @@
 
 #presentation-btn:hover {
   /* transform: scale(0.95); */
-  background: rgba(233, 207, 122, 1);
+  background: rgba(65, 150, 161, 1);
 }
 
 #presentation-btn:active {
-  background: rgba(201, 153, 6, 1);
+  background: rgba(65, 150, 161, 1);
 }
 
 .connected-users {
@@ -148,13 +148,13 @@
   right: 3%;
   font-size: 30px;
   transition: 0.3s ease;
-  background: rgba(233, 207, 122, 0.5);
+  background: rgba(65, 150, 161, 0.5);
   color: white;
   border-radius: 50%;
   padding: 10px;
 }
 
 #users-icon:hover {
-  background: rgba(233, 207, 122, 1);
+  background: rgba(65, 150, 161, 1);
   cursor: pointer;
 }
