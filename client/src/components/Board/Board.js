@@ -146,10 +146,6 @@ function Board(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    usersRef.current = socketUsers;
-  });
-
   const enableDragging = () => {
     canvas.current.on("mouse:down", function (opt) {
       var evt = opt.e;

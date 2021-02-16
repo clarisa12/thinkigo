@@ -75,7 +75,9 @@ export default function io(server) {
         });
       }
 
-      setTimeout(() => socket.in(room.roomId).emit("users", users), 400);
+      setInterval(() => {
+        socket.in(room.roomId).emit("users", users);
+      }, 5000);
       // Emit drawing received from client
       socket.on("draw", drawHandler);
 
@@ -89,16 +91,18 @@ export default function io(server) {
 
     function disconnectHandler() {
       const { room } = socket;
-      connectedUsers.set(room.roomId, connectedUsers.get(room.roomId) - 1);
+      connectedUsers.set(room, connectedUsers.get(room) - 1);
       let index = getUserById(socket.id);
       if (index > -1) users.splice(index, 1);
-      socket.in(room.roomId).emit("users", users);
+      console.log(room);
+      socket.in(room).emit("users", users);
+      console.log(users);
 
-      if (connectedUsers.get(room.roomId) === 0) {
-        redis.retrieve(socket.room.roomId, (err, data) => {
+      if (connectedUsers.get(room) === 0) {
+        redis.retrieve(socket.room, (err, data) => {
           // cleanup memory associated with room
-          redis.delete(socket.room.roomId);
-          flushBoardData2Mongo(socket.room.roomId, data);
+          redis.delete(socket.room);
+          flushBoardData2Mongo(socket.room, data);
         });
       }
     }
