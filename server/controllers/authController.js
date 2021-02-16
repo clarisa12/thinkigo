@@ -2,7 +2,7 @@ import { UserModel } from "../models/UserModel.js";
 
 export const handleSignIn = async (req, res) => {
     const { email, password } = req.body;
-    const message = "Email or password incorrect";
+    const message = "Email or password incorrect!";
     const user = await UserModel.findOne({ email });
 
     if (!user || !password) res.status(401).json({ success: false, message });

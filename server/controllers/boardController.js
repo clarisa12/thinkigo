@@ -2,14 +2,13 @@ import { BoardModel } from "../models/BoardModel.js";
 import { UserModel } from "../models/UserModel.js";
 
 export const createNew = async (req, res) => {
-    const { boardId, email, data, boardName } = req.body;
+    const { boardId, email, name } = req.body;
 
     const user = await UserModel.findOne({ email });
     const board = new BoardModel({
         boardId,
         author: user._id,
-        data,
-        boardName,
+        name,
     });
 
     try {

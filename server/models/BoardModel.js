@@ -11,7 +11,6 @@ const BoardSchema = new mongoose.Schema({
         required: true,
         index: true,
     },
-    boardName: String,
     thumbnail: { type: String },
     data: { type: String },
     name: { type: String },
