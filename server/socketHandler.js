@@ -16,6 +16,7 @@ const logInfo = (socket, room, db) => {
 // in order to flush the data from redis into mongo-db
 // after last client leaves the room
 const connectedUsers = new Map();
+const users = [];
 
 export default function io(server) {
     /* creating a new socket.io server instance */
@@ -26,6 +27,13 @@ export default function io(server) {
         },
     });
 
+    const getUserById = (id) => {
+        for (let i = 0; i < users.length; i++) {
+            if (users[i].id === id) return i;
+        }
+        return -1;
+    };
+
     function connectionHandler(socket) {
         // ==================
         // Events
@@ -35,13 +43,22 @@ export default function io(server) {
         // ==================
         // Handlers
         function joinRoomHandler(room) {
-            socket.join(room);
+            socket.join(room.roomId);
             // Attach room id to socket object
-            socket.room = room;
-            connectedUsers.set(room, connectedUsers.get(room) + 1 || 1);
+            socket.room = room.roomId;
 
+            connectedUsers.set(
+                room.roomId,
+                connectedUsers.get(room.roomId) + 1 || 1
+            );
+            let userData = {
+                name: room.name,
+                id: socket.id,
+            };
+            if (users.includes(userData.id) === false) users.push(userData);
+            socket.emit("users", users);
             // Whenever a new client connects check if there is data on redis
-            if (connectedUsers.get(room) === 1) {
+            if (connectedUsers.get(room.roomId) === 1) {
                 // load from mongo database
                 getBoardData(room).then((board) => {
                     logInfo(socket, room, "mongo");
@@ -54,7 +71,7 @@ export default function io(server) {
             } else {
                 logInfo(socket, room, "redis");
                 // try to get from redis
-                redis.retrieve(room, (err, data) => {
+                redis.retrieve(room.roomId, (err, data) => {
                     if (data) {
                         socket.emit("draw", JSON.parse(data));
                     }
@@ -65,16 +82,20 @@ export default function io(server) {
             socket.on("draw", drawHandler);
 
             function drawHandler(data) {
-                redis.store(room, JSON.stringify(data));
+                redis.store(room.roomId, JSON.stringify(data));
 
                 // broadcast to room
-                socket.in(room).broadcast.emit("draw", data);
+                socket.in(room.roomId).broadcast.emit("draw", data);
             }
         }
 
         function disconnectHandler() {
             const { room } = socket;
             connectedUsers.set(room, connectedUsers.get(room) - 1);
+            let index = getUserById(socket.id);
+            if (index > -1) users.splice(index, 1);
+            socket.emit("users", users);
+
             if (connectedUsers.get(room) === 0) {
                 redis.retrieve(socket.room, (err, data) => {
                     // cleanup memory associated with room

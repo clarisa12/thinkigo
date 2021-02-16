@@ -18,51 +18,45 @@
   display: flex;
   justify-content: space-around;
   position: absolute;
-  width: 500px;
+  width: 400px;
   height: 50px;
   right: 0;
   left: 0;
   margin: auto;
+  padding: 0px 12px 0px 12px;
   margin-top: 10px;
   z-index: 1;
-  /* background: rgba(255, 255, 255, 0.8); */
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.3);
 }
 
 #clear-btn {
   cursor: pointer;
-  border-radius: 5px;
   width: 100px;
   height: 30px;
-  background-color: rgba(233, 207, 122, 0.8);
-  color: #f8f8f8;
   outline: none;
   border: none;
   -moz-user-select: none;
   -khtml-user-select: none;
   -webkit-user-select: none;
   margin: 2px;
-  transition: 0.3s ease;
+  transition: 0.2s ease;
 }
 
 #clear-btn:hover {
+  color: white;
   background-color: rgba(233, 207, 122, 1);
 }
 
 #clear-btn:active {
+  color: white;
   background-color: rgba(201, 153, 6, 1);
-}
-
-.undo-redo {
-  padding: 10px;
-  font-size: 20px;
-  cursor: pointer;
 }
 
 #board-name {
   padding: 7px;
   border: none;
   background-color: rgb(242, 242, 242);
-  border-radius: 5px;
 }
 
 #board-name:focus {
@@ -71,14 +65,14 @@
 }
 
 #share-btn {
-  font-size: 30px;
+  font-size: 25px;
   cursor: pointer;
-  color: rgba(233, 207, 122, 0.8);
-  transition: 0.3s ease;
+  transition: 0.2s ease;
 }
 
 #share-btn:hover {
-  color: rgba(233, 207, 122, 1);
+  color: rgba(247, 210, 91, 0.748);
+  transition: 0.2s ease;
 }
 
 #share-btn:active {
@@ -86,7 +80,8 @@
 }
 
 .copy-popup {
-  background: whitesmoke;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.3);
   padding: 20px;
   position: absolute;
   top: 40px;
@@ -98,20 +93,6 @@
 .copy-popup.active {
   opacity: 1;
   transition: 500ms ease;
-}
-
-#copy-popup-btn {
-  padding: 5px;
-  margin-top: 10px;
-  color: white;
-  background: rgba(233, 207, 122, 1);
-  outline: none;
-  border: none;
-  cursor: pointer;
-}
-
-#copy-popup-btn:active {
-  background: rgba(201, 153, 6, 1);
 }
 
 #copy-input {
@@ -141,4 +122,39 @@
 
 #presentation-btn:active {
   background: rgba(201, 153, 6, 1);
+}
+
+.connected-users {
+  position: absolute;
+  padding: 10px;
+  right: -50%;
+  top: 8%;
+  z-index: 1;
+  width: 150px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: -3px 3px 5px -1px rgba(0, 0, 0, 0.3);
+  transition: 800ms ease;
+}
+
+.connected-users.active {
+  right: 0;
+  transition: 800ms ease;
+}
+
+#users-icon {
+  position: absolute;
+  z-index: 1;
+  top: 2%;
+  right: 3%;
+  font-size: 30px;
+  transition: 0.3s ease;
+  background: rgba(233, 207, 122, 0.5);
+  color: white;
+  border-radius: 50%;
+  padding: 10px;
+}
+
+#users-icon:hover {
+  background: rgba(233, 207, 122, 1);
+  cursor: pointer;
 }

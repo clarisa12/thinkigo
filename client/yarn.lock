@@ -8483,6 +8483,11 @@
     "from2" "^2.1.1"
     "p-is-promise" "^1.1.0"
 
+"intro.js@^3.3.1":
+  "integrity" "sha512-Y+iMbIzVQou9PDRP5miKa7NNQeUkSA6XFp+atnGiTarEi2jghthSLK+9JUvdM6QvQ9G+bpOEfKd+DNtWJlGb9w=="
+  "resolved" "https://registry.npmjs.org/intro.js/-/intro.js-3.3.1.tgz"
+  "version" "3.3.1"
+
 "ip-regex@^2.1.0":
   "integrity" "sha1-+ni/XS5pE8kRzp+BnuUUa7bYROk="
   "resolved" "https://registry.npmjs.org/ip-regex/-/ip-regex-2.1.0.tgz"
