@@ -53,7 +53,7 @@ export default function io(server) {
         id: socket.id,
       };
       if (users.includes(userData.id) === false) users.push(userData);
-      socket.emit("users", users);
+
       // Whenever a new client connects check if there is data on redis
       if (connectedUsers.get(room.roomId) === 1) {
         // load from mongo database
@@ -75,6 +75,7 @@ export default function io(server) {
         });
       }
 
+      setTimeout(() => socket.in(room.roomId).emit("users", users), 400);
       // Emit drawing received from client
       socket.on("draw", drawHandler);
 
@@ -91,7 +92,7 @@ export default function io(server) {
       connectedUsers.set(room.roomId, connectedUsers.get(room.roomId) - 1);
       let index = getUserById(socket.id);
       if (index > -1) users.splice(index, 1);
-      socket.emit("users", users);
+      socket.in(room.roomId).emit("users", users);
 
       if (connectedUsers.get(room.roomId) === 0) {
         redis.retrieve(socket.room.roomId, (err, data) => {

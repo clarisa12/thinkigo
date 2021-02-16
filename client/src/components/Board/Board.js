@@ -129,9 +129,19 @@ function Board(props) {
       }
     });
     canvas.current.on("object:removed", () => {
-      if (!canvas.current._activeObject) {
-        emitEvent();
-      }
+      emitEvent();
+    });
+    canvas.current.on("object:skewing", () => {
+      emitEvent();
+    });
+    canvas.current.on("object:moving", () => {
+      emitEvent();
+    });
+    canvas.current.on("object:scaling", () => {
+      emitEvent();
+    });
+    canvas.current.on("object:rotating", () => {
+      emitEvent();
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -306,6 +316,7 @@ function Board(props) {
     }).then((result) => {
       if (result) {
         canvas.current.clear();
+        emitEvent();
       }
     });
   };
